@@ -257,6 +257,7 @@
         const infoText = document.createElement("p");
         infoText.textContent = "画像のコピー/保存をしたい場合は以下画像をロングタップしてください。";
         infoText.style.color="#555";
+        infoText.style.margin="0";
         infoText.classList.add("ios-copy-info");
         copyBtn.parentNode.insertBefore(infoText, copyBtn.nextSibling);
       } else {
