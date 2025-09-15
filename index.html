@@ -165,18 +165,18 @@
       reader.readAsDataURL(file);
     }
 
-    // --- OCR処理 ---
+    // --- 前処理付きOCR ---
     async function runOCR(file) {
       const img = await loadImage(file);
 
-      // 抽出範囲と2倍拡大
+      // 抽出範囲
       const cropX = img.width * 0.075;
       const cropY = img.height * 0.385;
       const cropW = img.width * (0.30 - 0.075);
       const cropH = img.height * (0.925 - 0.385);
 
       const tmpCanvas = document.createElement('canvas');
-      tmpCanvas.width = cropW * 2;
+      tmpCanvas.width = cropW * 2; // 2倍拡大
       tmpCanvas.height = cropH * 2;
       const tmpCtx = tmpCanvas.getContext('2d');
       tmpCtx.drawImage(img,
@@ -184,6 +184,25 @@
         0, 0, cropW * 2, cropH * 2
       );
 
+      // --- 前処理: グレースケール + コントラスト強化 + 二値化 ---
+      const imageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
+      const data = imageData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i];
+        const g = data[i+1];
+        const b = data[i+2];
+        // グレースケール
+        let gray = 0.299*r + 0.587*g + 0.114*b;
+        // コントラスト強化
+        gray = (gray - 128) * 1.5 + 128;
+        gray = Math.max(0, Math.min(255, gray));
+        // 二値化
+        gray = gray > 150 ? 255 : 0;
+        data[i] = data[i+1] = data[i+2] = gray;
+      }
+      tmpCtx.putImageData(imageData, 0, 0);
+
+      // OCR実行
       const { data: { text } } = await Tesseract.recognize(
         tmpCanvas,
         'jpn+eng',
