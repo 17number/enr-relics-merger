@@ -13,10 +13,10 @@
   <p>結合したい遺物儀式の画像を2枚アップロードしてください。</p>
   <code>
     今の設定(後で消す)
-    const x = img.width * 0.10;
-    const y = img.height * 0.15;
-    const w = img.width * 0.35;
-    const h = img.height * 0.85;
+        const x = img.width * 0.05;
+        const y = img.height * 0.10;
+        const w = img.width * 0.35;
+        const h = img.height * 0.85;
   </code>
   <input type="file" id="file1" accept="image/*">
   <input type="file" id="file2" accept="image/*">
@@ -52,8 +52,8 @@
 
       // ===== トリミング範囲を割合で計算 =====
       function getCropBox(img) {
-        const x = img.width * 0.10;
-        const y = img.height * 0.15;
+        const x = img.width * 0.05;
+        const y = img.height * 0.10;
         const w = img.width * 0.35;
         const h = img.height * 0.85;
         return {x, y, w, h};
