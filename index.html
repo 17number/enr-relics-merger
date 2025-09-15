@@ -5,18 +5,53 @@
   <title>ELDEN RING NIGHTREIGN 遺物画像結合ツール</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
-    canvas { border: 1px solid #ccc; margin-top: 10px; }
+    #canvas { border: 1px solid #ccc; margin-top: 10px; display:none; }
+    .preview { max-width: 200px; margin: 5px; border: 1px solid #ccc; }
+    .drop-zone {
+      border: 2px dashed #999;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 10px 0;
+      text-align: center;
+      color: #666;
+    }
+    .drop-zone.dragover {
+      border-color: #333;
+      background: #fafafa;
+    }
+    .sample-area img { max-width: 200px; margin: 5px; border: 1px solid #ccc; }
   </style>
 </head>
 <body>
   <h1>ELDEN RING NIGHTREIGN 遺物画像結合ツール</h1>
-  <p>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめるツール。結合したい遺物儀式の画像を2枚アップロードしてください。</p>
-  <input type="file" id="file1" accept="image/*">
-  <input type="file" id="file2" accept="image/*">
+  <p>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像を2枚アップロードしてください。</p>
+
+  <div>
+    <input type="file" id="file1" accept="image/*">
+    <img id="preview1" class="preview" style="display:none;">
+  </div>
+  <div>
+    <input type="file" id="file2" accept="image/*">
+    <img id="preview2" class="preview" style="display:none;">
+  </div>
+
+  <div class="drop-zone" id="drop-zone">
+    ここに画像をドラッグ＆ドロップできます
+  </div>
+
   <button id="generate">生成</button>
   <a id="download" style="display:none">ダウンロード</a>
   <br>
   <canvas id="canvas"></canvas>
+
+  <h2>サンプル</h2>
+  <div class="sample-area">
+    <p>入力例:</p>
+    <img src="sample1_1-3.jpg" alt="サンプル1">
+    <img src="sample2_4-6.jpg" alt="サンプル2">
+    <p>出力例:</p>
+    <img src="sample3_1-6.png" alt="サンプル結合結果">
+  </div>
 
   <script>
     function loadImage(file) {
@@ -32,6 +67,23 @@
       });
     }
 
+    function setPreview(file, previewId) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const img = document.getElementById(previewId);
+        img.src = e.target.result;
+        img.style.display = "inline";
+      };
+      reader.readAsDataURL(file);
+    }
+
+    document.getElementById("file1").addEventListener("change", e => {
+      if (e.target.files[0]) setPreview(e.target.files[0], "preview1");
+    });
+    document.getElementById("file2").addEventListener("change", e => {
+      if (e.target.files[0]) setPreview(e.target.files[0], "preview2");
+    });
+
     document.getElementById("generate").addEventListener("click", async () => {
       const file1 = document.getElementById("file1").files[0];
       const file2 = document.getElementById("file2").files[0];
@@ -43,7 +95,6 @@
       const img1 = await loadImage(file1);
       const img2 = await loadImage(file2);
 
-      // ===== トリミング範囲を割合で計算 =====
       function getCropBox(img) {
         const x = img.width * 0.05;
         const y = img.height * 0.1125;
@@ -55,22 +106,48 @@
       const crop1 = getCropBox(img1);
       const crop2 = getCropBox(img2);
 
-      // 出力キャンバスのサイズを決定
       const canvas = document.getElementById("canvas");
       canvas.width = crop1.w + crop2.w;
       canvas.height = Math.max(crop1.h, crop2.h);
+      canvas.style.display = "block";
+      canvas.style.maxWidth = "80vw";
       const ctx = canvas.getContext("2d");
 
-      // 描画（2枚横並び）
       ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
       ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
 
-      // ダウンロードリンク設定
       const link = document.getElementById("download");
-      link.href = canvas.toDataURL("image/png");
-      link.download = "merged.png";
+      link.href = canvas.toDataURL("image/jpeg");
+      link.download = "merged.jpg";
       link.style.display = "inline";
       link.textContent = "ダウンロード";
+    });
+
+    // ===== ドラッグ＆ドロップ対応 =====
+    const dropZone = document.getElementById("drop-zone");
+    dropZone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+      if (files.length >= 2) {
+        document.getElementById("file1").files = new DataTransfer().files;
+        document.getElementById("file2").files = new DataTransfer().files;
+        // 最初の2枚を使う
+        document.getElementById("file1").files = (d => { d.items.add(files[0]); return d; })(new DataTransfer());
+        document.getElementById("file2").files = (d => { d.items.add(files[1]); return d; })(new DataTransfer());
+        setPreview(files[0], "preview1");
+        setPreview(files[1], "preview2");
+      } else {
+        alert("2枚以上の画像をドロップしてください");
+      }
     });
   </script>
 </body>
