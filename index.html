@@ -4,7 +4,13 @@
   <meta charset="UTF-8">
   <title>ELDEN RING NIGHTREIGN 遺物画像結合ツール</title>
   <style>
-    body { font-family: "Segoe UI", sans-serif; padding: 20px; background: #f8f9fa; color:#333; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      padding: 20px;
+      background: #f8f9fa;
+      color:#333;
+      font-size: 16px;
+    }
     h1 { font-size: 1.4rem; }
     .input-area {
       display: flex; gap: 20px; flex-wrap: wrap;
@@ -36,11 +42,8 @@
       color: #666;
       background:#fff;
     }
-    .drop-zone.dragover {
-      border-color: #333;
-      background: #f0f0f0;
-    }
-    #generate, #download {
+    .drop-zone.dragover { border-color: #333; background: #f0f0f0; }
+    #generate, #download, #copy {
       margin: 10px 5px 20px 0;
       padding: 10px 20px;
       font-size: 1rem;
@@ -49,8 +52,16 @@
       cursor: pointer;
     }
     #generate { background:#007bff; color:#fff; }
-    #download { background:#28a745; color:#fff; display:none; text-decoration:none; text-align:center; }
-    #canvas { border: 1px solid #ccc; margin-top: 10px; display:none; max-width: 80vw; }
+    #download { background:#28a745; color:#fff; display:none; text-decoration:none; }
+    #copy { background:#17a2b8; color:#fff; display:none; }
+    #canvas { display:none; } /* canvasは裏方 */
+    #output-img {
+      margin-top:10px;
+      max-width: 80vw;
+      display:none;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
     .sample-area img {
       max-width: 400px;
       margin: 5px;
@@ -58,8 +69,6 @@
       border-radius:6px;
       cursor:pointer;
     }
-
-    /* オーバーレイ */
     .overlay {
       position: fixed; inset: 0;
       background: rgba(0,0,0,0.8);
@@ -69,13 +78,15 @@
       z-index: 1000;
     }
     .overlay img {
-      max-width: 90vw;
-      max-height: 90vh;
-      border-radius:8px;
-      box-shadow:0 0 10px #000;
+      max-width: 90vw; max-height: 90vh;
+      border-radius:8px; box-shadow:0 0 10px #000;
     }
-    .overlay.active {
-      visibility: visible; opacity: 1;
+    .overlay.active { visibility: visible; opacity: 1; }
+
+    /* スマホ用 */
+    @media (max-width: 768px) {
+      body { font-size: 18px; }
+      .drop-zone { display:none; }
     }
   </style>
 </head>
@@ -102,8 +113,10 @@
 
   <button id="generate">生成</button>
   <a id="download">ダウンロード</a>
+  <button id="copy">コピー</button>
   <br>
   <canvas id="canvas"></canvas>
+  <img id="output-img" alt="結合結果">
 
   <h2>サンプル</h2>
   <div class="sample-area">
@@ -114,7 +127,6 @@
     <img src="images/sample3_1-6.jpg" alt="サンプル結合結果">
   </div>
 
-  <!-- オーバーレイ -->
   <div class="overlay" id="overlay">
     <img id="overlay-img" src="">
   </div>
@@ -175,19 +187,35 @@
       const canvas = document.getElementById("canvas");
       canvas.width = crop1.w + crop2.w;
       canvas.height = Math.max(crop1.h, crop2.h);
-      canvas.style.display = "block";
       const ctx = canvas.getContext("2d");
 
       ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
       ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
 
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      const outputImg = document.getElementById("output-img");
+      outputImg.src = dataUrl;
+      outputImg.style.display = "block";
+
+      // タイムスタンプ付きファイル名
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const MM = String(now.getMonth()+1).padStart(2,"0");
+      const dd = String(now.getDate()).padStart(2,"0");
+      const hh = String(now.getHours()).padStart(2,"0");
+      const mm = String(now.getMinutes()).padStart(2,"0");
+      const ss = String(now.getSeconds()).padStart(2,"0");
+      const filename = `enr_merged_relics_${yyyy}${MM}${dd}_${hh}${mm}${ss}.jpg`;
+
       const link = document.getElementById("download");
-      link.href = canvas.toDataURL("image/jpeg");
-      link.download = "merged.jpg";
+      link.href = dataUrl;
+      link.download = filename;
       link.style.display = "inline-block";
+
+      document.getElementById("copy").style.display = "inline-block";
     });
 
-    // ===== ドラッグ＆ドロップ対応 =====
+    // ドラッグ＆ドロップ
     const dropZone = document.getElementById("drop-zone");
     dropZone.addEventListener("dragover", e => {
       e.preventDefault();
@@ -215,7 +243,22 @@
       }
     });
 
-    // ===== オーバーレイ表示 =====
+    // コピー機能
+    document.getElementById("copy").addEventListener("click", async () => {
+      const outputImg = document.getElementById("output-img");
+      const response = await fetch(outputImg.src);
+      const blob = await response.blob();
+      try {
+        await navigator.clipboard.write([
+          new ClipboardItem({ [blob.type]: blob })
+        ]);
+        alert("画像をクリップボードにコピーしました！");
+      } catch (err) {
+        alert("コピーに失敗しました: " + err);
+      }
+    });
+
+    // オーバーレイ
     function enableOverlay(selector) {
       document.querySelectorAll(selector).forEach(img => {
         img.addEventListener("click", () => {
@@ -228,6 +271,7 @@
     }
     enableOverlay(".preview");
     enableOverlay(".sample-area img");
+    enableOverlay("#output-img");
 
     document.getElementById("overlay").addEventListener("click", () => {
       document.getElementById("overlay").classList.remove("active");
