@@ -10,7 +10,7 @@
 </head>
 <body>
   <h1>ELDEN RING NIGHTREIGN 遺物画像結合ツール</h1>
-  <p>結合したい遺物儀式の画像を2枚アップロードしてください。</p>
+  <p>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめるツール。結合したい遺物儀式の画像を2枚アップロードしてください。</p>
   <input type="file" id="file1" accept="image/*">
   <input type="file" id="file2" accept="image/*">
   <button id="generate">生成</button>
@@ -46,9 +46,9 @@
       // ===== トリミング範囲を割合で計算 =====
       function getCropBox(img) {
         const x = img.width * 0.05;
-        const y = img.height * 0.125;
+        const y = img.height * 0.1125;
         const w = img.width * 0.325;
-        const h = img.height * 0.825;
+        const h = img.height * 0.8125;
         return {x, y, w, h};
       }
 
