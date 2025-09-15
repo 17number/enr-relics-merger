@@ -4,7 +4,6 @@ ELDEN RING NIGHTREIGN の遺物効果1〜3の画像、4〜6の画像を結合し
 
 https://17number.github.io/enr-relics-merger/
 
-
 ## サンプル
 
 ### 入力画像
@@ -14,3 +13,9 @@ https://17number.github.io/enr-relics-merger/
 ### 出力画像
 
 <img src="images/sample3_1-6.jpg" alt="sample3" style="width:45vw;">
+
+## 要望など
+
+なにかあれば [Issues](https://github.com/17number/enr-relics-merger/issues/new) からご連絡ください。可能な範囲で対応します。
+
+すでに [類似の Issue が無いかを事前確認](https://github.com/17number/enr-relics-merger/issues?q=is%3Aissue) したうえでご連絡頂けると助かります。
