@@ -140,7 +140,8 @@
   </div>
 
   <script>
-    function loadImage(file) {
+    // 画像読み込み
+    async function loadImage(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = e => {
@@ -153,6 +154,7 @@
       });
     }
 
+    // プレビュー表示
     function setPreview(file, previewId) {
       const reader = new FileReader();
       reader.onload = e => {
@@ -163,150 +165,39 @@
       reader.readAsDataURL(file);
     }
 
-    // --- OCR機能 ---
-    async function extractTextFromFile(file, label) {
-      try {
-        const img = await loadImage(file);
-        const cropX = img.width * 0.075;
-        const cropY = img.height * 0.385;
-        const cropW = img.width * (0.30 - 0.075);
-        const cropH = img.height * (0.925 - 0.385);
+    // --- OCR処理 ---
+    async function runOCR(file) {
+      const img = await loadImage(file);
 
-        const canvas = document.createElement("canvas");
-        canvas.width = cropW;
-        canvas.height = cropH;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      // 抽出範囲と2倍拡大
+      const cropX = img.width * 0.075;
+      const cropY = img.height * 0.385;
+      const cropW = img.width * (0.30 - 0.075);
+      const cropH = img.height * (0.925 - 0.385);
 
-        const result = await Tesseract.recognize(canvas, "jpn", {
-          logger: m => console.log(`${label}:`, m)
-        });
+      const tmpCanvas = document.createElement('canvas');
+      tmpCanvas.width = cropW * 2;
+      tmpCanvas.height = cropH * 2;
+      const tmpCtx = tmpCanvas.getContext('2d');
+      tmpCtx.drawImage(img,
+        cropX, cropY, cropW, cropH,
+        0, 0, cropW * 2, cropH * 2
+      );
 
-        console.debug(`${label} OCR 結果:`, result.data.text);
-      } catch (err) {
-        console.error(`${label} OCR 失敗:`, err);
-      }
+      const { data: { text } } = await Tesseract.recognize(
+        tmpCanvas,
+        'jpn+eng',
+        { logger: m => console.log(m) }
+      );
+
+      // 簡単な後処理
+      const processed = text
+        .replace(/\s+/g, '')
+        .replace(/甘P/g, 'HP')
+        .replace(/Fp/g, 'FP');
+
+      return processed;
     }
-
-    // file1 と file2 選択時に OCR を実行
-    document.getElementById("file1").addEventListener("change", async e => {
-      if (e.target.files[0]) {
-        setPreview(e.target.files[0], "preview1");
-        await extractTextFromFile(e.target.files[0], "file1");
-      }
-    });
-
-    document.getElementById("file2").addEventListener("change", async e => {
-      if (e.target.files[0]) {
-        setPreview(e.target.files[0], "preview2");
-        await extractTextFromFile(e.target.files[0], "file2");
-      }
-    });
-
-    document.getElementById("generate").addEventListener("click", async () => {
-      const file1 = document.getElementById("file1").files[0];
-      const file2 = document.getElementById("file2").files[0];
-      if (!file1 || !file2) {
-        alert("画像を2枚選んでください");
-        return;
-      }
-
-      const img1 = await loadImage(file1);
-      const img2 = await loadImage(file2);
-
-      function getCropBox(img) {
-        const x = img.width * 0.05;
-        const y = img.height * 0.1125;
-        const w = img.width * 0.325;
-        const h = img.height * 0.8125;
-        return {x, y, w, h};
-      }
-
-      const crop1 = getCropBox(img1);
-      const crop2 = getCropBox(img2);
-
-      const canvas = document.getElementById("canvas");
-      canvas.width = crop1.w + crop2.w;
-      canvas.height = Math.max(crop1.h, crop2.h);
-      const ctx = canvas.getContext("2d");
-
-      ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
-      ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
-
-      const dataUrl = canvas.toDataURL("image/jpeg");
-      const outputImg = document.getElementById("output-img");
-      outputImg.src = dataUrl;
-      outputImg.style.display = "block";
-
-      // タイムスタンプ付きファイル名
-      const now = new Date();
-      const yyyy = now.getFullYear();
-      const MM = String(now.getMonth()+1).padStart(2,"0");
-      const dd = String(now.getDate()).padStart(2,"0");
-      const hh = String(now.getHours()).padStart(2,"0");
-      const mm = String(now.getMinutes()).padStart(2,"0");
-      const ss = String(now.getSeconds()).padStart(2,"0");
-      const filename = `enr_merged_relics_${yyyy}${MM}${dd}_${hh}${mm}${ss}.jpg`;
-
-      const link = document.getElementById("download");
-      link.href = dataUrl;
-      link.download = filename;
-      link.style.display = "inline-block";
-
-      // コピー機能表示制御（iOS判定）
-      handleCopyButtonDisplay();
-    });
-
-    // ドラッグ＆ドロップ
-    const dropZone = document.getElementById("drop-zone");
-    dropZone.addEventListener("dragover", e => {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
-    dropZone.addEventListener("dragleave", () => {
-      dropZone.classList.remove("dragover");
-    });
-    dropZone.addEventListener("drop", e => {
-      e.preventDefault();
-      dropZone.classList.remove("dragover");
-
-      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
-      if (files.length >= 2) {
-        const dt1 = new DataTransfer();
-        const dt2 = new DataTransfer();
-        dt1.items.add(files[0]);
-        dt2.items.add(files[1]);
-        document.getElementById("file1").files = dt1.files;
-        document.getElementById("file2").files = dt2.files;
-        setPreview(files[0], "preview1");
-        setPreview(files[1], "preview2");
-
-        // OCRも実行
-        extractTextFromFile(files[0], "file1");
-        extractTextFromFile(files[1], "file2");
-      } else {
-        alert("2枚以上の画像をドロップしてください");
-      }
-    });
-
-    // オーバーレイ
-    function enableOverlay(selector) {
-      document.querySelectorAll(selector).forEach(img => {
-        img.addEventListener("click", () => {
-          const overlay = document.getElementById("overlay");
-          const overlayImg = document.getElementById("overlay-img");
-          overlayImg.src = img.src;
-          overlay.classList.add("active");
-        });
-      });
-    }
-    enableOverlay(".preview");
-    enableOverlay(".sample-area img");
-    enableOverlay("#output-img");
-
-    document.getElementById("overlay").addEventListener("click", () => {
-      document.getElementById("overlay").classList.remove("active");
-    });
 
     // --- iOS判定とコピー機能制御 ---
     function isiOS() {
@@ -316,7 +207,7 @@
     function handleCopyButtonDisplay() {
       const copyBtn = document.getElementById("copy");
 
-      // 既に文言があれば削除
+      // 既存文言削除
       const existingInfo = copyBtn.nextElementSibling;
       if (existingInfo && existingInfo.classList.contains("ios-copy-info")) {
         existingInfo.remove();
@@ -347,9 +238,118 @@
           } catch (err) {
             alert("コピーに失敗しました: " + err);
           }
-        }, { once: true }); // 二重登録防止
+        }, { once: true });
       }
     }
+
+    // ファイル選択イベント
+    document.getElementById("file1").addEventListener("change", e => {
+      if (e.target.files[0]) setPreview(e.target.files[0], "preview1");
+    });
+    document.getElementById("file2").addEventListener("change", e => {
+      if (e.target.files[0]) setPreview(e.target.files[0], "preview2");
+    });
+
+    // 生成ボタン
+    document.getElementById("generate").addEventListener("click", async () => {
+      const file1 = document.getElementById("file1").files[0];
+      const file2 = document.getElementById("file2").files[0];
+      if (!file1 || !file2) {
+        alert("画像を2枚選んでください");
+        return;
+      }
+
+      // 画像結合
+      const img1 = await loadImage(file1);
+      const img2 = await loadImage(file2);
+      const crop1 = { x: img1.width * 0.05, y: img1.height * 0.1125, w: img1.width * 0.325, h: img1.height * 0.8125 };
+      const crop2 = { x: img2.width * 0.05, y: img2.height * 0.1125, w: img2.width * 0.325, h: img2.height * 0.8125 };
+
+      const canvas = document.getElementById("canvas");
+      canvas.width = crop1.w + crop2.w;
+      canvas.height = Math.max(crop1.h, crop2.h);
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
+      ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
+
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      const outputImg = document.getElementById("output-img");
+      outputImg.src = dataUrl;
+      outputImg.style.display = "block";
+
+      const now = new Date();
+      const yyyy = now.getFullYear();
+      const MM = String(now.getMonth()+1).padStart(2,"0");
+      const dd = String(now.getDate()).padStart(2,"0");
+      const hh = String(now.getHours()).padStart(2,"0");
+      const mm = String(now.getMinutes()).padStart(2,"0");
+      const ss = String(now.getSeconds()).padStart(2,"0");
+      const filename = `enr_merged_relics_${yyyy}${MM}${dd}_${hh}${mm}${ss}.jpg`;
+
+      const link = document.getElementById("download");
+      link.href = dataUrl;
+      link.download = filename;
+      link.style.display = "inline-block";
+
+      // コピー表示制御
+      handleCopyButtonDisplay();
+
+      // --- OCR処理 ---
+      console.debug("=== OCR 結果 (file1) ===");
+      const ocr1 = await runOCR(file1);
+      console.debug(ocr1);
+
+      console.debug("=== OCR 結果 (file2) ===");
+      const ocr2 = await runOCR(file2);
+      console.debug(ocr2);
+    });
+
+    // ドラッグ＆ドロップ
+    const dropZone = document.getElementById("drop-zone");
+    dropZone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+      if (files.length >= 2) {
+        const dt1 = new DataTransfer();
+        const dt2 = new DataTransfer();
+        dt1.items.add(files[0]);
+        dt2.items.add(files[1]);
+        document.getElementById("file1").files = dt1.files;
+        document.getElementById("file2").files = dt2.files;
+        setPreview(files[0], "preview1");
+        setPreview(files[1], "preview2");
+      } else {
+        alert("2枚以上の画像をドロップしてください");
+      }
+    });
+
+    // オーバーレイ
+    function enableOverlay(selector) {
+      document.querySelectorAll(selector).forEach(img => {
+        img.addEventListener("click", () => {
+          const overlay = document.getElementById("overlay");
+          const overlayImg = document.getElementById("overlay-img");
+          overlayImg.src = img.src;
+          overlay.classList.add("active");
+        });
+      });
+    }
+    enableOverlay(".preview");
+    enableOverlay(".sample-area img");
+    enableOverlay("#output-img");
+
+    document.getElementById("overlay").addEventListener("click", () => {
+      document.getElementById("overlay").classList.remove("active");
+    });
   </script>
 </body>
 </html>
