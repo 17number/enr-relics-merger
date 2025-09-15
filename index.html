@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>遺物画像結合ツール</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    canvas { border: 1px solid #ccc; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>遺物画像結合ツール</h1>
+  <p>結合したい遺物儀式の画像を2枚アップロードしてください。</p>
+  <input type="file" id="file1" accept="image/*">
+  <input type="file" id="file2" accept="image/*">
+  <button id="generate">生成</button>
+  <a id="download" style="display:none">ダウンロード</a>
+  <br>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    function loadImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    document.getElementById("generate").addEventListener("click", async () => {
+      const file1 = document.getElementById("file1").files[0];
+      const file2 = document.getElementById("file2").files[0];
+      if (!file1 || !file2) {
+        alert("画像を2枚選んでください");
+        return;
+      }
+
+      const img1 = await loadImage(file1);
+      const img2 = await loadImage(file2);
+
+      // トリミング座標 (x, y, width, height)
+      const crop = { x: 300, y: 180, w: 850, h: 570 };
+
+      const canvas = document.getElementById("canvas");
+      canvas.width = crop.w * 2;
+      canvas.height = crop.h;
+      const ctx = canvas.getContext("2d");
+
+      ctx.drawImage(img1, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
+      ctx.drawImage(img2, crop.x, crop.y, crop.w, crop.h, crop.w, 0, crop.w, crop.h);
+
+      // ダウンロードリンク
+      const link = document.getElementById("download");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "d3.png";
+      link.style.display = "inline";
+      link.textContent = "ダウンロード";
+    });
+  </script>
+</body>
+</html>
