@@ -245,14 +245,19 @@
 
     // コピー機能
     document.getElementById("copy").addEventListener("click", async () => {
-      const outputImg = document.getElementById("output-img");
-      const response = await fetch(outputImg.src);
-      const blob = await response.blob();
+      const canvas = document.getElementById("canvas");
       try {
-        await navigator.clipboard.write([
-          new ClipboardItem({ [blob.type]: blob })
-        ]);
-        alert("画像をクリップボードにコピーしました！");
+        // JPEG でも PNG に変換してコピー
+        canvas.toBlob(async (blob) => {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({ "image/png": blob })
+            ]);
+            alert("画像をクリップボードにコピーしました！");
+          } catch (err) {
+            alert("コピーに失敗しました: " + err);
+          }
+        }, "image/png");
       } catch (err) {
         alert("コピーに失敗しました: " + err);
       }
