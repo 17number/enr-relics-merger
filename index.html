@@ -63,6 +63,9 @@
       border: 1px solid #ccc;
       border-radius: 6px;
     }
+    #ocr-output {
+      display: none;
+    }
     .sample-area img {
       max-width: min(400px, 80vw);
       margin: 5px;
@@ -124,6 +127,13 @@
   <br>
   <canvas id="canvas"></canvas>
   <img id="output-img" alt="結合結果">
+  <div id="ocr-output" style="margin-top: 10px; font-family: monospace; color: #333;">
+    <h3>文字抽出結果(β版)</h3>
+    <h4 style="margin-top: 5px; margin-bottom: 5px">遺物1〜3</h4>
+    <div id="ocr-output-inner1" style="white-space: pre-wrap;"></div>
+    <h4 style="margin-top: 5px; margin-bottom: 5px">遺物4〜6</h4>
+    <div id="ocr-output-inner2" style="white-space: pre-wrap;"></div>
+  </div>
 
   <h2>サンプル</h2>
   <div class="sample-area">
@@ -281,12 +291,15 @@
 
       // OCR出力領域
       const ocrOutputDiv = document.getElementById("ocr-output");
-      ocrOutputDiv.textContent="OCR 読み取り中…";
+      ocrOutputDiv.style.display="block";
 
       try {
-        const text1 = await runOCR(file1, ocrOutputDiv);
-        const text2 = await runOCR(file2, ocrOutputDiv);
-        ocrOutputDiv.textContent = `=== 遺物1〜3 ===\n${text1}\n\n=== 遺物4〜6 ===\n${text2}`;
+        const ocrOutputInner1 = document.getElementById("ocr-output-inner1");
+        const ocrOutputInner2 = document.getElementById("ocr-output-inner2");
+        const text1 = await runOCR(file1, ocrOutputInner1);
+        ocrOutputInner1.textContent = `${text1}`;
+        const text2 = await runOCR(file2, ocrOutputInner2);
+        ocrOutputInner2.textContent = `${text2}`;
       } catch(err){
         ocrOutputDiv.textContent = "OCR に失敗しました: "+err;
       }
