@@ -43,21 +43,32 @@
       const img1 = await loadImage(file1);
       const img2 = await loadImage(file2);
 
-      // トリミング座標 (x, y, width, height)
-      const crop = { x: 300, y: 180, w: 850, h: 570 };
+      // ===== トリミング範囲を割合で計算 =====
+      function getCropBox(img) {
+        const x = img.width * 0.40;           // 横40%の位置から
+        const y = img.height * 0.10;          // 縦10%の位置から
+        const w = img.width - x;              // 残り60%を切り取り
+        const h = img.height * 0.80;          // 縦は90% - 10% = 80%ぶん切り取り
+        return {x, y, w, h};
+      }
 
+      const crop1 = getCropBox(img1);
+      const crop2 = getCropBox(img2);
+
+      // 出力キャンバスのサイズを決定
       const canvas = document.getElementById("canvas");
-      canvas.width = crop.w * 2;
-      canvas.height = crop.h;
+      canvas.width = crop1.w + crop2.w;
+      canvas.height = Math.max(crop1.h, crop2.h);
       const ctx = canvas.getContext("2d");
 
-      ctx.drawImage(img1, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
-      ctx.drawImage(img2, crop.x, crop.y, crop.w, crop.h, crop.w, 0, crop.w, crop.h);
+      // 描画（2枚横並び）
+      ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
+      ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
 
-      // ダウンロードリンク
+      // ダウンロードリンク設定
       const link = document.getElementById("download");
       link.href = canvas.toDataURL("image/png");
-      link.download = "d3.png";
+      link.download = "merged.png";
       link.style.display = "inline";
       link.textContent = "ダウンロード";
     });
