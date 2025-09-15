@@ -14,6 +14,7 @@
     .drop-zone { border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; color: #666; background:#fff; }
     .drop-zone.dragover { border-color: #333; background: #f0f0f0; }
     button, a { margin: 10px 5px 20px 0; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; }
+    #swap { background:#3399ff; color:#fff; }
     #generate { background:#007bff; color:#fff; }
     #generate:disabled { background:#ccc; cursor:not-allowed; }
     #reset { background:#dc3545; color:#fff; }
@@ -60,6 +61,7 @@
 
   <div class="drop-zone" id="drop-zone">ここに画像をドラッグ＆ドロップできます (2枚)</div>
 
+  <button id="swap">画像入れ替え</button>
   <button id="generate" disabled>生成</button>
   <button id="reset">リセット</button>
   <a id="download">ダウンロード</a>
@@ -93,6 +95,7 @@
   <script>
     const file1Input = document.getElementById("file1");
     const file2Input = document.getElementById("file2");
+    const swapBtn = document.getElementById("swap");
     const generateBtn = document.getElementById("generate");
     const resetBtn = document.getElementById("reset");
     const copyBtn = document.getElementById("copy");
@@ -142,6 +145,25 @@
     file1Input.addEventListener("change",()=>{ setPreview(file1Input.files[0],"preview1"); updateGenerateButton(); });
     file2Input.addEventListener("change",()=>{ setPreview(file2Input.files[0],"preview2"); updateGenerateButton(); });
     updateGenerateButton();
+
+    swapBtn.addEventListener("click", () => {
+      // ファイルオブジェクトを入れ替え
+      const tempFiles = file1Input.files;
+      file1Input.files = file2Input.files;
+      file2Input.files = tempFiles;
+
+      // プレビューも入れ替え
+      const tempSrc = document.getElementById("preview1").src;
+      document.getElementById("preview1").src = document.getElementById("preview2").src;
+      document.getElementById("preview2").src = tempSrc;
+
+      // プレビュー表示制御
+      document.getElementById("preview1").style.display = file1Input.files[0] ? "block" : "none";
+      document.getElementById("preview2").style.display = file2Input.files[0] ? "block" : "none";
+
+      // 生成ボタン状態更新
+      updateGenerateButton();
+    });
 
     resetBtn.addEventListener("click",()=>{
       file1Input.value=""; file2Input.value="";
