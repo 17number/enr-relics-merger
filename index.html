@@ -303,8 +303,19 @@
       updateGenerateButton();
     });
 
+    // オーバーレイ
+    function enableOverlay(selector) {
+      document.querySelectorAll(selector).forEach(img => {
+        img.addEventListener("click", () => {
+          const overlay = document.getElementById("overlay");
+          const overlayImg = document.getElementById("overlay-img");
+          overlayImg.src = img.src;
+          overlay.classList.add("active");
+        });
+      });
+    }
+    enableOverlay("#preview1, #preview2, #output-img, .sample-area img");
     const overlay=document.getElementById("overlay");
-    outputImg.addEventListener("click",()=>{ overlay.querySelector("img").src=outputImg.src; overlay.classList.add("active"); });
     overlay.addEventListener("click",()=>overlay.classList.remove("active"));
   </script>
 </body>
