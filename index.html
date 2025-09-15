@@ -11,13 +11,6 @@
 <body>
   <h1>遺物画像結合ツール</h1>
   <p>結合したい遺物儀式の画像を2枚アップロードしてください。</p>
-  <code>
-    今の設定(後で消す)
-        const x = img.width * 0.05;
-        const y = img.height * 0.10;
-        const w = img.width * 0.35;
-        const h = img.height * 0.825;
-  </code>
   <input type="file" id="file1" accept="image/*">
   <input type="file" id="file2" accept="image/*">
   <button id="generate">生成</button>
@@ -54,7 +47,7 @@
       function getCropBox(img) {
         const x = img.width * 0.05;
         const y = img.height * 0.10;
-        const w = img.width * 0.35;
+        const w = img.width * 0.325;
         const h = img.height * 0.825;
         return {x, y, w, h};
       }
