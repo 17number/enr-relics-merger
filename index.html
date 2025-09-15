@@ -167,10 +167,10 @@
     async function extractTextFromFile(file, label) {
       try {
         const img = await loadImage(file);
-        const cropX = img.width * 0.05;
-        const cropY = img.height * 0.1125;
-        const cropW = img.width * (0.375 - 0.05);
-        const cropH = img.height * (0.925 - 0.1125);
+        const cropX = img.width * 0.075;
+        const cropY = img.height * 0.385;
+        const cropW = img.width * (0.30 - 0.075);
+        const cropH = img.height * (0.925 - 0.385);
 
         const canvas = document.createElement("canvas");
         canvas.width = cropW;
