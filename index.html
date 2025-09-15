@@ -165,7 +165,7 @@
       reader.readAsDataURL(file);
     }
 
-    // --- 前処理付きOCR ---
+    // --- 強力前処理付きOCR ---
     async function runOCR(file) {
       const img = await loadImage(file);
 
@@ -184,21 +184,39 @@
         0, 0, cropW * 2, cropH * 2
       );
 
-      // --- 前処理: グレースケール + コントラスト強化 + 二値化 ---
+      // 前処理: グレースケール + コントラスト強化 + 二値化 + ノイズ除去
       const imageData = tmpCtx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
       const data = imageData.data;
+      // グレースケール + コントラスト強化 + 二値化
       for (let i = 0; i < data.length; i += 4) {
-        const r = data[i];
-        const g = data[i+1];
-        const b = data[i+2];
-        // グレースケール
+        const r = data[i], g = data[i+1], b = data[i+2];
         let gray = 0.299*r + 0.587*g + 0.114*b;
-        // コントラスト強化
-        gray = (gray - 128) * 1.5 + 128;
+        gray = (gray - 128) * 1.8 + 128;
         gray = Math.max(0, Math.min(255, gray));
-        // 二値化
         gray = gray > 150 ? 255 : 0;
         data[i] = data[i+1] = data[i+2] = gray;
+      }
+
+      // 簡易ノイズ除去（小さい孤立した白点を黒に）
+      const w = tmpCanvas.width;
+      const h = tmpCanvas.height;
+      const copyData = new Uint8ClampedArray(data);
+      for (let y = 1; y < h-1; y++) {
+        for (let x = 1; x < w-1; x++) {
+          const idx = (y*w + x)*4;
+          if (copyData[idx] === 255) {
+            let count = 0;
+            for (let dy=-1; dy<=1; dy++) {
+              for (let dx=-1; dx<=1; dx++) {
+                const nIdx = ((y+dy)*w + (x+dx))*4;
+                if (copyData[nIdx] === 255) count++;
+              }
+            }
+            if (count <= 2) { // 周囲がほとんど黒なら消す
+              data[idx] = data[idx+1] = data[idx+2] = 0;
+            }
+          }
+        }
       }
       tmpCtx.putImageData(imageData, 0, 0);
 
@@ -209,7 +227,7 @@
         { logger: m => console.log(m) }
       );
 
-      // 簡単な後処理
+      // 簡易後処理
       const processed = text
         .replace(/\s+/g, '')
         .replace(/甘P/g, 'HP')
@@ -226,7 +244,6 @@
     function handleCopyButtonDisplay() {
       const copyBtn = document.getElementById("copy");
 
-      // 既存文言削除
       const existingInfo = copyBtn.nextElementSibling;
       if (existingInfo && existingInfo.classList.contains("ios-copy-info")) {
         existingInfo.remove();
@@ -310,32 +327,23 @@
       link.download = filename;
       link.style.display = "inline-block";
 
-      // コピー表示制御
       handleCopyButtonDisplay();
 
-      // --- OCR処理 ---
-      console.debug("=== OCR 結果 (file1) ===");
-      const ocr1 = await runOCR(file1);
-      console.debug(ocr1);
-
-      console.debug("=== OCR 結果 (file2) ===");
-      const ocr2 = await runOCR(file2);
-      console.debug(ocr2);
+      // OCR実行（コンソールに出力）
+      console.debug("=== OCR 結果 ===");
+      const text1 = await runOCR(file1);
+      console.debug("file1:", text1);
+      const text2 = await runOCR(file2);
+      console.debug("file2:", text2);
     });
 
     // ドラッグ＆ドロップ
     const dropZone = document.getElementById("drop-zone");
-    dropZone.addEventListener("dragover", e => {
-      e.preventDefault();
-      dropZone.classList.add("dragover");
-    });
-    dropZone.addEventListener("dragleave", () => {
-      dropZone.classList.remove("dragover");
-    });
+    dropZone.addEventListener("dragover", e => { e.preventDefault(); dropZone.classList.add("dragover"); });
+    dropZone.addEventListener("dragleave", () => { dropZone.classList.remove("dragover"); });
     dropZone.addEventListener("drop", e => {
       e.preventDefault();
       dropZone.classList.remove("dragover");
-
       const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
       if (files.length >= 2) {
         const dt1 = new DataTransfer();
@@ -365,7 +373,6 @@
     enableOverlay(".preview");
     enableOverlay(".sample-area img");
     enableOverlay("#output-img");
-
     document.getElementById("overlay").addEventListener("click", () => {
       document.getElementById("overlay").classList.remove("active");
     });
