@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>ELDEN RING NIGHTREIGN 遺物画像結合ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
@@ -85,6 +86,12 @@
 
     /* スマホ用 */
     @media (max-width: 768px) {
+      body { font-size: 18px; }
+      .drop-zone { display:none; }
+    }
+
+    /* またはタッチデバイス向け */
+    @media (hover: none) and (pointer: coarse) {
       body { font-size: 18px; }
       .drop-zone { display:none; }
     }
