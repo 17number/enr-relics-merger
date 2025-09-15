@@ -212,7 +212,8 @@
       link.download = filename;
       link.style.display = "inline-block";
 
-      document.getElementById("copy").style.display = "inline-block";
+      // コピー機能表示制御（iOS判定）
+      handleCopyButtonDisplay();
     });
 
     // ドラッグ＆ドロップ
@@ -243,26 +244,6 @@
       }
     });
 
-    // コピー機能
-    document.getElementById("copy").addEventListener("click", async () => {
-      const canvas = document.getElementById("canvas");
-      try {
-        // JPEG でも PNG に変換してコピー
-        canvas.toBlob(async (blob) => {
-          try {
-            await navigator.clipboard.write([
-              new ClipboardItem({ "image/png": blob })
-            ]);
-            alert("画像をクリップボードにコピーしました！");
-          } catch (err) {
-            alert("コピーに失敗しました: " + err);
-          }
-        }, "image/png");
-      } catch (err) {
-        alert("コピーに失敗しました: " + err);
-      }
-    });
-
     // オーバーレイ
     function enableOverlay(selector) {
       document.querySelectorAll(selector).forEach(img => {
@@ -281,6 +262,49 @@
     document.getElementById("overlay").addEventListener("click", () => {
       document.getElementById("overlay").classList.remove("active");
     });
+
+    // --- iOS判定とコピー機能制御 ---
+    function isiOS() {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+
+    function handleCopyButtonDisplay() {
+      const copyBtn = document.getElementById("copy");
+
+      // 既に文言があれば削除
+      const existingInfo = copyBtn.nextElementSibling;
+      if (existingInfo && existingInfo.classList.contains("ios-copy-info")) {
+        existingInfo.remove();
+      }
+
+      if (isiOS()) {
+        copyBtn.style.display = "none";
+        const infoText = document.createElement("p");
+        infoText.textContent = "iOSではコピーできません。画像を保存したい場合は長押ししてください。";
+        infoText.style.color = "#555";
+        infoText.classList.add("ios-copy-info");
+        copyBtn.parentNode.insertBefore(infoText, copyBtn.nextSibling);
+      } else {
+        copyBtn.style.display = "inline-block";
+        copyBtn.addEventListener("click", async () => {
+          const canvas = document.getElementById("canvas");
+          try {
+            canvas.toBlob(async (blob) => {
+              try {
+                await navigator.clipboard.write([
+                  new ClipboardItem({ "image/png": blob })
+                ]);
+                alert("画像をクリップボードにコピーしました！");
+              } catch (err) {
+                alert("コピーに失敗しました: " + err);
+              }
+            }, "image/png");
+          } catch (err) {
+            alert("コピーに失敗しました: " + err);
+          }
+        }, { once: true }); // 二重登録防止
+      }
+    }
   </script>
 </body>
 </html>
