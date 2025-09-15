@@ -264,16 +264,42 @@
     const dropZone=document.getElementById("drop-zone");
     dropZone.addEventListener("dragover",e=>{ e.preventDefault(); dropZone.classList.add("dragover"); });
     dropZone.addEventListener("dragleave",()=>{ dropZone.classList.remove("dragover"); });
-    dropZone.addEventListener("drop",e=>{
-      e.preventDefault(); dropZone.classList.remove("dragover");
-      const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith("image/"));
-      if(files.length>=2){
-        const dt1=new DataTransfer(), dt2=new DataTransfer();
-        dt1.items.add(files[0]); dt2.items.add(files[1]);
-        file1Input.files=dt1.files; file2Input.files=dt2.files;
-        setPreview(files[0],"preview1"); setPreview(files[1],"preview2");
-        updateGenerateButton();
-      } else alert("2枚以上の画像をドロップしてください");
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+
+      const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith("image/"));
+      if(files.length === 0) return;
+
+      // 1枚ドロップ
+      if(files.length === 1){
+        if(!file1Input.files[0]){
+          const dt1 = new DataTransfer();
+          dt1.items.add(files[0]);
+          file1Input.files = dt1.files;
+          setPreview(files[0], "preview1");
+        } else if(!file2Input.files[0]){
+          const dt2 = new DataTransfer();
+          dt2.items.add(files[0]);
+          file2Input.files = dt2.files;
+          setPreview(files[0], "preview2");
+        } else {
+          alert("既に両方の枠が埋まっています。2枚まとめてドラッグ＆ドロップするか、リセットしてやり直してください。");
+        }
+      }
+      // 2枚以上ドロップ → 総入れ替え
+      else {
+        const dt1 = new DataTransfer();
+        const dt2 = new DataTransfer();
+        dt1.items.add(files[0]);
+        dt2.items.add(files[1]);
+        file1Input.files = dt1.files;
+        file2Input.files = dt2.files;
+        setPreview(files[0], "preview1");
+        setPreview(files[1], "preview2");
+      }
+
+      updateGenerateButton();
     });
 
     const overlay=document.getElementById("overlay");
