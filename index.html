@@ -5,99 +5,28 @@
   <title>ELDEN RING NIGHTREIGN 遺物画像結合ツール</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      padding: 20px;
-      background: #f8f9fa;
-      color:#333;
-      font-size: 16px;
-    }
+    body { font-family: "Segoe UI", sans-serif; padding: 20px; background: #f8f9fa; color:#333; font-size: 16px; }
     h1 { font-size: 1.4rem; }
-    .input-area {
-      display: flex; gap: 20px; flex-wrap: wrap;
-    }
-    .file-block {
-      flex: 1;
-      min-width: 200px;
-      background: #fff;
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+    .input-area { display: flex; gap: 20px; flex-wrap: wrap; }
+    .file-block { flex: 1; min-width: 200px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .file-block h3 { margin: 0 0 8px; font-size: 1rem; }
-    .preview {
-      display:block;
-      max-width: min(400px, 80vw);
-      max-height: 400px;
-      margin-top: 10px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-    .drop-zone {
-      border: 2px dashed #999;
-      border-radius: 8px;
-      padding: 20px;
-      margin: 20px 0;
-      text-align: center;
-      color: #666;
-      background:#fff;
-    }
+    .preview { display:block; max-width: min(400px, 80vw); max-height: 400px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+    .drop-zone { border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; color: #666; background:#fff; }
     .drop-zone.dragover { border-color: #333; background: #f0f0f0; }
-    #generate, #download, #copy {
-      margin: 10px 5px 20px 0;
-      padding: 10px 20px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+    button, a { margin: 10px 5px 20px 0; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; }
     #generate { background:#007bff; color:#fff; }
+    #generate:disabled { background:#ccc; cursor:not-allowed; }
+    #reset { background:#dc3545; color:#fff; }
     #download { background:#28a745; color:#fff; display:none; text-decoration:none; }
     #copy { background:#17a2b8; color:#fff; display:none; }
-    #canvas { display:none; } /* canvasは裏方 */
-    #output-img {
-      margin-top:10px;
-      max-width: 80vw;
-      display:none;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-    #ocr-output {
-      display: none;
-    }
-    .sample-area img {
-      max-width: min(400px, 80vw);
-      margin: 5px;
-      border: 1px solid #ccc;
-      border-radius:6px;
-      cursor:pointer;
-    }
-    .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.8);
-      display: flex; align-items: center; justify-content: center;
-      visibility: hidden; opacity: 0;
-      transition: opacity 0.3s;
-      z-index: 1000;
-    }
-    .overlay img {
-      max-width: 90vw; max-height: 90vh;
-      border-radius:8px; box-shadow:0 0 10px #000;
-    }
+    #canvas { display:none; }
+    #output-img { margin-top:10px; max-width: 80vw; display:none; border: 1px solid #ccc; border-radius: 6px; }
+    #ocr-output { display: none; margin-top: 10px; font-family: monospace; color: #333; }
+    .sample-area img { max-width: min(400px, 80vw); margin: 5px; border: 1px solid #ccc; border-radius:6px; cursor:pointer; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; z-index: 1000; }
+    .overlay img { max-width: 90vw; max-height: 90vh; border-radius:8px; box-shadow:0 0 10px #000; }
     .overlay.active { visibility: visible; opacity: 1; }
-
-    /* スマホ用 */
-    @media (max-width: 768px) {
-      body { font-size: 18px; }
-      .drop-zone { display:none; }
-    }
-
-    /* またはタッチデバイス向け */
-    @media (hover: none) and (pointer: coarse) {
-      body { font-size: 18px; }
-      .drop-zone { display:none; }
-    }
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) { body { font-size: 18px; } .drop-zone { display:none; } }
   </style>
 </head>
 <body>
@@ -117,21 +46,21 @@
     </div>
   </div>
 
-  <div class="drop-zone" id="drop-zone">
-    ここに画像をドラッグ＆ドロップできます (2枚)
-  </div>
+  <div class="drop-zone" id="drop-zone">ここに画像をドラッグ＆ドロップできます (2枚)</div>
 
-  <button id="generate">生成</button>
+  <button id="generate" disabled>生成</button>
+  <button id="reset">リセット</button>
   <a id="download">ダウンロード</a>
   <button id="copy">コピー</button>
-  <br>
+
   <canvas id="canvas"></canvas>
   <img id="output-img" alt="結合結果">
-  <div id="ocr-output" style="margin-top: 10px; font-family: monospace; color: #333;">
+
+  <div id="ocr-output">
     <h3>文字抽出結果(β版)</h3>
-    <h4 style="margin-top: 5px; margin-bottom: 5px">遺物1〜3</h4>
+    <h4>遺物1〜3</h4>
     <div id="ocr-output-inner1" style="white-space: pre-wrap;"></div>
-    <h4 style="margin-top: 5px; margin-bottom: 5px">遺物4〜6</h4>
+    <h4>遺物4〜6</h4>
     <div id="ocr-output-inner2" style="white-space: pre-wrap;"></div>
   </div>
 
@@ -150,162 +79,172 @@
 
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
   <script>
-    async function loadImage(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = e => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.src = e.target.result;
+    const file1Input = document.getElementById("file1");
+    const file2Input = document.getElementById("file2");
+    const generateBtn = document.getElementById("generate");
+    const resetBtn = document.getElementById("reset");
+    const copyBtn = document.getElementById("copy");
+    const downloadLink = document.getElementById("download");
+    const ocrOutputDiv = document.getElementById("ocr-output");
+    const ocrInner1 = document.getElementById("ocr-output-inner1");
+    const ocrInner2 = document.getElementById("ocr-output-inner2");
+    const outputImg = document.getElementById("output-img");
+
+    let replaceRules = {};
+
+    // 外部置換ルール読み込み
+    async function loadReplaceRules() {
+      try {
+        const res = await fetch('./replace_rules.json');
+        replaceRules = await res.json();
+      } catch(e){ console.warn("置換ルール読み込み失敗",e); replaceRules={}; }
+    }
+    loadReplaceRules();
+
+    async function loadImage(file){
+      return new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=e=>{
+          const img=new Image();
+          img.onload=()=>resolve(img);
+          img.src=e.target.result;
         };
-        reader.onerror = reject;
+        reader.onerror=reject;
         reader.readAsDataURL(file);
       });
     }
 
-    function setPreview(file, previewId) {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const img = document.getElementById(previewId);
-        img.src = e.target.result;
-        img.style.display = "block";
+    function setPreview(file, previewId){
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const img=document.getElementById(previewId);
+        img.src=e.target.result; img.style.display="block";
       };
       reader.readAsDataURL(file);
     }
 
-    async function preprocessImage(file) {
-      const img = await loadImage(file);
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+    function updateGenerateButton(){
+      generateBtn.disabled = !(file1Input.files[0] && file2Input.files[0]);
+    }
 
-      // 前処理: グレースケール
-      const imageData = ctx.getImageData(0,0,canvas.width,canvas.height);
-      const data = imageData.data;
-      for (let i=0;i<data.length;i+=4){
-        const avg = 0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
+    file1Input.addEventListener("change",()=>{ setPreview(file1Input.files[0],"preview1"); updateGenerateButton(); });
+    file2Input.addEventListener("change",()=>{ setPreview(file2Input.files[0],"preview2"); updateGenerateButton(); });
+    updateGenerateButton();
+
+    resetBtn.addEventListener("click",()=>{
+      file1Input.value=""; file2Input.value="";
+      document.querySelectorAll("#preview1, #preview2, #output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
+      document.getElementById("canvas").getContext("2d").clearRect(0,0,document.getElementById("canvas").width,document.getElementById("canvas").height);
+      ocrOutputDiv.style.display="none";
+      document.querySelectorAll("#ocr-output-inner1, #ocr-output-inner2").forEach(div=>{ div.textContent=""; });
+      document.querySelectorAll("#copy, #download").forEach(btn=>{ btn.style.display="none"; });
+      document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
+      updateGenerateButton();
+    });
+
+    async function preprocessImage(file){
+      const img = await loadImage(file);
+      const canvas=document.createElement("canvas");
+      canvas.width=img.width; canvas.height=img.height;
+      const ctx=canvas.getContext("2d"); ctx.drawImage(img,0,0);
+      const imageData=ctx.getImageData(0,0,canvas.width,canvas.height);
+      const data=imageData.data;
+      for(let i=0;i<data.length;i+=4){
+        const avg=0.299*data[i]+0.587*data[i+1]+0.114*data[i+2];
         data[i]=data[i+1]=data[i+2]=avg;
       }
       ctx.putImageData(imageData,0,0);
-
-      // 拡大して解像度上げる
-      const scaledCanvas = document.createElement("canvas");
-      scaledCanvas.width = canvas.width*2;
-      scaledCanvas.height = canvas.height*2;
-      const sctx = scaledCanvas.getContext("2d");
-      sctx.drawImage(canvas,0,0,scaledCanvas.width,scaledCanvas.height);
-
-      return scaledCanvas;
+      const scaled=document.createElement("canvas"); scaled.width=canvas.width*2; scaled.height=canvas.height*2;
+      scaled.getContext("2d").drawImage(canvas,0,0,scaled.width,scaled.height);
+      return scaled;
     }
 
-    async function runOCR(file, outputDiv) {
-      const processedCanvas = await preprocessImage(file);
+    async function runOCR(file, outputDiv){
+      const processed = await preprocessImage(file);
+      const cropX=processed.width*0.075, cropY=processed.height*0.385;
+      const cropW=processed.width*(0.30-0.075), cropH=processed.height*(0.925-0.385);
+      const cropCanvas=document.createElement("canvas"); cropCanvas.width=cropW; cropCanvas.height=cropH;
+      cropCanvas.getContext("2d").drawImage(processed,cropX,cropY,cropW,cropH,0,0,cropW,cropH);
 
-      const cropX = processedCanvas.width * 0.075;
-      const cropY = processedCanvas.height * 0.385;
-      const cropW = processedCanvas.width * (0.30 - 0.075);
-      const cropH = processedCanvas.height * (0.925 - 0.385);
+      const { data:{ text } } = await Tesseract.recognize(cropCanvas,'jpn',{
+        logger:m=>{ if(m.status==='recognizing text') outputDiv.textContent=`OCR 読み取り中… ${Math.floor(m.progress*100)}%`; }
+      });
 
-      const cropCanvas = document.createElement("canvas");
-      cropCanvas.width = cropW;
-      cropCanvas.height = cropH;
-      const ctx = cropCanvas.getContext("2d");
-      ctx.drawImage(processedCanvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
-
-      const { data: { text } } = await Tesseract.recognize(
-        cropCanvas,
-        'jpn',
-        {
-          logger: m => {
-            if (m.status === 'recognizing text' && outputDiv) {
-              outputDiv.textContent = `OCR 読み取り中… ${Math.floor(m.progress*100)}%`;
-            }
-          }
-        }
-      );
-      return text.trim();
+      const lines=text.split('\n').map(l=>l.replace(/\s+/g,''));
+      const replaced=lines.map(l=>{
+        let s=l;
+        for(const key in replaceRules){ s=s.split(key).join(replaceRules[key]); }
+        return s;
+      });
+      return replaced.join('\n');
     }
 
-    document.getElementById("file1").addEventListener("change", e => { if(e.target.files[0]) setPreview(e.target.files[0], "preview1"); });
-    document.getElementById("file2").addEventListener("change", e => { if(e.target.files[0]) setPreview(e.target.files[0], "preview2"); });
+    function isiOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
+    copyBtn.onclick=async()=>{
+      const canvas=document.getElementById("canvas");
+      canvas.toBlob(async blob=>{
+        try{ await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); alert("画像をクリップボードにコピーしました！"); }
+        catch(e){ alert("コピー失敗: "+e);}
+      },"image/png");
+    };
 
-    // コピーボタン表示制御
-    function isiOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
-    function handleCopyButtonDisplay() {
-      const copyBtn = document.getElementById("copy");
-      const existingInfo = copyBtn.nextElementSibling;
-      if(existingInfo && existingInfo.classList.contains("ios-copy-info")) existingInfo.remove();
+    generateBtn.addEventListener("click",async()=>{
+      const file1=file1Input.files[0], file2=file2Input.files[0];
+      if(!file1||!file2){ alert("画像を2枚選択してください"); return; }
 
-      if (isiOS()) {
-        copyBtn.style.display = "none";
+      const img1=await loadImage(file1); const img2=await loadImage(file2);
+      const crop1={x:img1.width*0.05,y:img1.height*0.1125,w:img1.width*0.325,h:img1.height*0.8125};
+      const crop2={x:img2.width*0.05,y:img2.height*0.1125,w:img2.width*0.325,h:img2.height*0.8125};
+
+      const canvas=document.getElementById("canvas"); canvas.width=crop1.w+crop2.w; canvas.height=Math.max(crop1.h,crop2.h);
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(img1,crop1.x,crop1.y,crop1.w,crop1.h,0,0,crop1.w,crop1.h);
+      ctx.drawImage(img2,crop2.x,crop2.y,crop2.w,crop2.h,crop1.w,0,crop2.w,crop2.h);
+
+      const dataUrl=canvas.toDataURL("image/jpeg");
+      outputImg.src=dataUrl; outputImg.style.display="block";
+
+      const now=new Date();
+      downloadLink.href=dataUrl;
+      downloadLink.download=`enr_merged_relics_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.jpg`;
+      downloadLink.style.display="inline-block";
+
+      if(isiOS()){
         const infoText = document.createElement("p");
         infoText.textContent = "画像のコピー/保存をしたい場合は以下画像をロングタップしてください。";
         infoText.style.color="#555";
         infoText.classList.add("ios-copy-info");
         copyBtn.parentNode.insertBefore(infoText, copyBtn.nextSibling);
       } else {
-        copyBtn.style.display = "inline-block";
-        copyBtn.addEventListener("click", async () => {
-          const canvas = document.getElementById("canvas");
-          canvas.toBlob(async (blob) => {
-            try { await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); alert("画像をクリップボードにコピーしました！"); }
-            catch(err){ alert("コピーに失敗しました: "+err);}
-          }, "image/png");
-        }, { once:true });
+        copyBtn.style.display="inline-block";
+        document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
       }
-    }
 
-    // 生成ボタン
-    document.getElementById("generate").addEventListener("click", async () => {
-      const file1 = document.getElementById("file1").files[0];
-      const file2 = document.getElementById("file2").files[0];
-      if (!file1 || !file2) { alert("画像を2枚選んでください"); return; }
-
-      const img1 = await loadImage(file1);
-      const img2 = await loadImage(file2);
-
-      const crop1 = { x: img1.width *0.05, y: img1.height*0.1125, w: img1.width*0.325, h: img1.height*0.8125 };
-      const crop2 = { x: img2.width *0.05, y: img2.height*0.1125, w: img2.width*0.325, h: img2.height*0.8125 };
-
-      const canvas = document.getElementById("canvas");
-      canvas.width = crop1.w + crop2.w;
-      canvas.height = Math.max(crop1.h, crop2.h);
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
-      ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
-
-      const dataUrl = canvas.toDataURL("image/jpeg");
-      const outputImg = document.getElementById("output-img");
-      outputImg.src = dataUrl;
-      outputImg.style.display="block";
-
-      const now = new Date();
-      const filename = `enr_merged_relics_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.jpg`;
-
-      const link = document.getElementById("download");
-      link.href = dataUrl; link.download = filename; link.style.display="inline-block";
-
-      handleCopyButtonDisplay();
-
-      // OCR出力領域
-      const ocrOutputDiv = document.getElementById("ocr-output");
       ocrOutputDiv.style.display="block";
-
-      try {
-        const ocrOutputInner1 = document.getElementById("ocr-output-inner1");
-        const ocrOutputInner2 = document.getElementById("ocr-output-inner2");
-        const text1 = await runOCR(file1, ocrOutputInner1);
-        ocrOutputInner1.textContent = `${text1}`;
-        const text2 = await runOCR(file2, ocrOutputInner2);
-        ocrOutputInner2.textContent = `${text2}`;
-      } catch(err){
-        ocrOutputDiv.textContent = "OCR に失敗しました: "+err;
-      }
+      try{
+        ocrInner1.textContent = await runOCR(file1,ocrInner1);
+        ocrInner2.textContent = await runOCR(file2,ocrInner2);
+      }catch(e){ ocrOutputDiv.textContent="OCRに失敗: "+e; }
     });
 
-    // ドラッグ＆ドロップやオーバーレイは従来コードのまま
+    const dropZone=document.getElementById("drop-zone");
+    dropZone.addEventListener("dragover",e=>{ e.preventDefault(); dropZone.classList.add("dragover"); });
+    dropZone.addEventListener("dragleave",()=>{ dropZone.classList.remove("dragover"); });
+    dropZone.addEventListener("drop",e=>{
+      e.preventDefault(); dropZone.classList.remove("dragover");
+      const files=Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith("image/"));
+      if(files.length>=2){
+        const dt1=new DataTransfer(), dt2=new DataTransfer();
+        dt1.items.add(files[0]); dt2.items.add(files[1]);
+        file1Input.files=dt1.files; file2Input.files=dt2.files;
+        setPreview(files[0],"preview1"); setPreview(files[1],"preview2");
+        updateGenerateButton();
+      } else alert("2枚以上の画像をドロップしてください");
+    });
+
+    const overlay=document.getElementById("overlay");
+    outputImg.addEventListener("click",()=>{ overlay.querySelector("img").src=outputImg.src; overlay.classList.add("active"); });
+    overlay.addEventListener("click",()=>overlay.classList.remove("active"));
   </script>
 </body>
 </html>
