@@ -162,7 +162,7 @@
     async function runOCR(file, outputDiv){
       const processed = await preprocessImage(file);
       const cropX=processed.width*0.075, cropY=processed.height*0.385;
-      const cropW=processed.width*(0.30-0.075), cropH=processed.height*(0.925-0.385);
+      const cropW=processed.width*(0.325-0.075), cropH=processed.height*(0.925-0.385);
       const cropCanvas=document.createElement("canvas"); cropCanvas.width=cropW; cropCanvas.height=cropH;
       cropCanvas.getContext("2d").drawImage(processed,cropX,cropY,cropW,cropH,0,0,cropW,cropH);
 
