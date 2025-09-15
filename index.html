@@ -21,7 +21,8 @@
     #download { background:#28a745; color:#fff; display:none; text-decoration:none; }
     #copy { background:#17a2b8; color:#fff; display:none; }
     #canvas { display:none; }
-    #output-img { margin-top:10px; max-width: 80vw; display:none; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
+    #output { display:none; }
+    #output-img { margin-top:10px; max-width: 80vw; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
     #ocr-output { display: none; margin-top: 10px; font-family: monospace; color: #333; }
     .sample-area img { max-width: min(400px, 80vw); margin: 5px; border: 1px solid #ccc; border-radius:6px; cursor:pointer; }
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; z-index: 1000; }
@@ -65,11 +66,16 @@
   <button id="swap">画像入れ替え</button>
   <button id="generate" disabled>生成</button>
   <button id="reset">リセット</button>
-  <a id="download">ダウンロード</a>
-  <button id="copy">コピー</button>
 
-  <canvas id="canvas"></canvas>
-  <img id="output-img" alt="結合結果">
+  <div id="output">
+    <h2 style="margin-bottom: 0">出力結果</h2>
+    <div>
+      <a id="download">ダウンロード</a>
+      <button id="copy">コピー</button>
+    </div>
+    <canvas id="canvas"></canvas>
+    <img id="output-img" alt="結合結果">
+  </div>
 
   <div id="ocr-output">
     <h3>文字抽出結果(β版)</h3>
@@ -104,6 +110,7 @@
     const ocrOutputDiv = document.getElementById("ocr-output");
     const ocrInner1 = document.getElementById("ocr-output-inner1");
     const ocrInner2 = document.getElementById("ocr-output-inner2");
+    const outputDiv = document.getElementById("output");
     const outputImg = document.getElementById("output-img");
 
     let replaceRules = {};
@@ -168,6 +175,7 @@
 
     resetBtn.addEventListener("click",()=>{
       file1Input.value=""; file2Input.value="";
+      outputDiv.style.display="none";
       document.querySelectorAll("#preview1, #preview2, #output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
       document.getElementById("canvas").getContext("2d").clearRect(0,0,document.getElementById("canvas").width,document.getElementById("canvas").height);
       ocrOutputDiv.style.display="none";
@@ -237,7 +245,8 @@
       ctx.drawImage(img2,crop2.x,crop2.y,crop2.w,crop2.h,crop1.w,0,crop2.w,crop2.h);
 
       const dataUrl=canvas.toDataURL("image/jpeg");
-      outputImg.src=dataUrl; outputImg.style.display="block";
+      outputImg.src=dataUrl;
+      outputDiv.style.display="block";
 
       const now=new Date();
       downloadLink.href=dataUrl;
