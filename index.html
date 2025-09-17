@@ -8,6 +8,7 @@
     body { font-family: "Segoe UI", sans-serif; padding: 20px; background: #f8f9fa; color:#333; font-size: 16px; }
     h1 { font-size: 1.4rem; }
     .input-area { display: flex; gap: 20px; flex-wrap: wrap; }
+    .pattern-block label { cursor: pointer; }
     .file-block { flex: 1; min-width: 200px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .file-block h3 { margin: 0 0 8px; font-size: 1rem; }
     .preview { display:block; max-width: min(400px, 80vw); max-height: 400px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
@@ -33,13 +34,13 @@
 </head>
 <body>
   <h1>ELDEN RING NIGHTREIGN 遺物画像結合ツール</h1>
-  <p style="margin: 0">1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像を2枚選択してください。</p>
+  <p style="margin: 0">1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。</p>
   <!-- 注意事項 -->
   <details style="margin:10px 0;">
     <summary style="cursor: pointer; color:#007bff;">注意事項 (クリックで展開)</summary>
     <ul style="color:#555; font-size: 0.9rem; margin: 0.25rem 0 1rem; padding-inline-start: 30px;">
       <li>画像はそれぞれ1〜3枠、4〜6枠の遺物効果が写っている必要があります。</li>
-      <li>座標指定で切り抜いているため画像サイズ次第では正常に結合できない場合があります。</li>
+      <li>座標指定で切り抜いているため画像サイズなどの要因で正常に結合できない場合があります。</li>
       <li>選択できる画像は2枚までです。ドラッグ＆ドロップで2枚以上選択した場合は先頭の2枚が使用されます。</li>
       <li>選択した画像はブラウザ上で処理され、サーバーには送信されません。</li>
       <li>文字認識(OCR)機能はβ版です。<a href="https://tesseract.projectnaptha.com/" target="_blank" style="padding: 0;">Tesseract.js</a>を使用しています。認識精度は保証されません。</li>
@@ -47,6 +48,15 @@
       <li>なにかあれば <a href="https://github.com/17number/enr-relics-merger/issues/new" target="_blank" style="padding: 0;">Issues</a>からご連絡ください。可能な範囲で対応します。すでに<a href="http://github.com/17number/enr-relics-merger/issues?q=is%3Aissue" target="_blank" style="padding: 0;">類似の Issue が無いかを事前確認</a>したうえでご連絡頂けると助かります</li>
     </ul>
   </details>
+
+  <!-- 画面タイプ選択 -->
+  <div class="pattern-block" style="margin-bottom: 0.5rem">
+    <fieldset>
+      <legend>画面タイプを選択</legend>
+      <label><input type="radio" name="pattern" value="ritual" checked> 遺物儀式画面 (デフォルト)</label><br>
+      <label><input type="radio" name="pattern" value="status"> ステータス画面</label>
+    </fieldset>
+  </div>
 
   <div class="input-area">
     <div class="file-block">
@@ -87,11 +97,22 @@
 
   <h2>サンプル</h2>
   <div class="sample-area">
-    <p>入力例:</p>
-    <img src="images/sample1_1-3.jpg" alt="サンプル1">
-    <img src="images/sample2_4-6.jpg" alt="サンプル2">
-    <p>出力例:</p>
-    <img src="images/sample3_1-6.jpg" alt="サンプル結合結果">
+    <h3>パターン1(遺物儀式画面)</h3>
+    <div class="sample-pattern1">
+      <p>入力例:</p>
+      <img src="images/sample_a1_1-3.jpg" alt="サンプル_a1">
+      <img src="images/sample_a2_4-6.jpg" alt="サンプル_a2">
+      <p>出力例:</p>
+      <img src="images/sample_a3_1-6.jpg" alt="サンプル_a3_結合結果">
+    </div>
+    <h3>パターン2(ステータス画面)</h3>
+    <div class="sample-pattern2">
+      <p>入力例:</p>
+      <img src="images/sample_b1_1-3.jpg" alt="サンプル_b1">
+      <img src="images/sample_b2_4-6.jpg" alt="サンプル_b2">
+      <p>出力例:</p>
+      <img src="images/sample_b3_1-6.jpg" alt="サンプル_b3_結合結果">
+    </div>
   </div>
 
   <div class="overlay" id="overlay">
@@ -123,6 +144,12 @@
       } catch(e){ console.warn("置換ルール読み込み失敗",e); replaceRules={}; }
     }
     loadReplaceRules();
+
+    // 画面タイプ選択
+    let selectedPattern = "ritual";
+    document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
+      radio.addEventListener("change",e=>selectedPattern=e.target.value);
+    });
 
     async function loadImage(file){
       return new Promise((resolve,reject)=>{
@@ -202,10 +229,17 @@
       return scaled;
     }
 
+    function getOcrCropBox(img) {
+      if(selectedPattern==="ritual"){
+        return { x: img.width*0.075, y: img.height*0.385, w: img.width*(0.325-0.075), h: img.height*(0.925-0.385) };
+      } else {
+        return { x: img.width*0.425, y: img.height*0.27, w: img.width*0.325, h: img.height*0.58 };
+      }
+    }
+
     async function runOCR(file, outputDiv){
       const processed = await preprocessImage(file);
-      const cropX=processed.width*0.075, cropY=processed.height*0.385;
-      const cropW=processed.width*(0.325-0.075), cropH=processed.height*(0.925-0.385);
+      const { x: cropX, y: cropY, w: cropW, h: cropH } = getOcrCropBox(processed);
       const cropCanvas=document.createElement("canvas"); cropCanvas.width=cropW; cropCanvas.height=cropH;
       cropCanvas.getContext("2d").drawImage(processed,cropX,cropY,cropW,cropH,0,0,cropW,cropH);
 
@@ -231,13 +265,21 @@
       },"image/png");
     };
 
+    function getCropBox(img) {
+      if(selectedPattern==="ritual"){
+        return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.325, h: img.height*0.8125 };
+      } else {
+        return { x: img.width*0.35, y: img.height*0.27, w: img.width*0.40, h: img.height*0.58 };
+      }
+    }
+
     generateBtn.addEventListener("click",async()=>{
       const file1=file1Input.files[0], file2=file2Input.files[0];
       if(!file1||!file2){ alert("画像を2枚選択してください"); return; }
 
       const img1=await loadImage(file1); const img2=await loadImage(file2);
-      const crop1={x:img1.width*0.05,y:img1.height*0.1125,w:img1.width*0.325,h:img1.height*0.8125};
-      const crop2={x:img2.width*0.05,y:img2.height*0.1125,w:img2.width*0.325,h:img2.height*0.8125};
+      const crop1=getCropBox(img1);
+      const crop2=getCropBox(img2);
 
       const canvas=document.getElementById("canvas"); canvas.width=crop1.w+crop2.w; canvas.height=Math.max(crop1.h,crop2.h);
       const ctx=canvas.getContext("2d");
@@ -246,6 +288,7 @@
 
       const dataUrl=canvas.toDataURL("image/jpeg");
       outputImg.src=dataUrl;
+      outputImg.style.display="block";
       outputDiv.style.display="block";
 
       const now=new Date();
