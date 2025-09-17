@@ -60,7 +60,7 @@
     <input type="radio" id="lang-en" name="langSelect" value="en">
     <label for="lang-en">🇺🇸 English</label>
   </div>
-  <p style="margin: 0" data-i18n="desc">1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。</p>
+  <p style="margin: 0" data-i18n="desc" data-i18n-html>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
   <!-- 注意事項 -->
   <details style="margin:10px 0;">
     <summary style="cursor: pointer; color:#007bff;" data-i18n="noteSummary">注意事項 (クリックで展開)</summary>
@@ -123,7 +123,7 @@
     <div id="ocr-output-inner2" style="white-space: pre-wrap;"></div>
   </div>
 
-  <h2 data-i18n="sample">サンプル</h2>
+  <h2 id="sample" data-i18n="sample">サンプル</h2>
   <div class="sample-area">
     <h3 data-i18n="pattern1">パターン1(遺物儀式画面)</h3>
     <div class="sample-pattern1">
@@ -167,7 +167,7 @@
         alertGenerateSuccess: "結合画像を生成しました",
         alertSelectTwoImages: "画像を2枚選択してください",
         copy: "コピー",
-        desc: "1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。",
+        desc: `1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
         download: "ダウンロード",
         dropHere: "ここに画像をドラッグ＆ドロップできます (2枚)",
         errorOCRFailed: "OCRに失敗: ",
@@ -208,7 +208,7 @@
         alertGenerateSuccess: "Combined image generated",
         alertSelectTwoImages: "Please select two images",
         copy: "Copy",
-        desc: "Combine relic effect images of slots 1–3 and 4–6 into one image. Please select two images from the relic rites screen or the status screen that you want to combine.",
+        desc: `Combine relic effect images of slots 1–3 and 4–6 into one image. Please select two images from the relic rites screen or the status screen that you want to combine. ( <a href="#sample" style="padding: 0;">Examples</a>)`,
         download: "Download",
         dropHere: "Drag & Drop images here (2 images)",
         errorOCRFailed: "OCR failed: ",
