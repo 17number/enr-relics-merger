@@ -29,6 +29,24 @@
     .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; visibility: hidden; opacity: 0; transition: opacity 0.3s; z-index: 1000; }
     .overlay img { max-width: 90vw; max-height: 90vh; border-radius:8px; box-shadow:0 0 10px #000; }
     .overlay.active { visibility: visible; opacity: 1; }
+
+    /* トースト通知 */
+    #toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      /* transform: translateX(-50%); */
+      background: rgba(0,0,0,0.85);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      z-index: 10000;
+    }
+
     @media (max-width: 768px), (hover: none) and (pointer: coarse) { body { font-size: 18px; } .drop-zone { display:none; } }
   </style>
 </head>
@@ -126,6 +144,9 @@
     <img id="overlay-img" src="">
   </div>
 
+  <!-- トースト通知 -->
+  <div id="toast"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
   <script>
     /********************
@@ -135,7 +156,8 @@
       ja: {
         alertBothFramesFilled: "既に両方の枠が埋まっています。2枚まとめてドラッグ＆ドロップするか、リセットしてやり直してください。",
         alertCopyError: "コピー失敗: ",
-        alertCopySuccess: "画像をクリップボードにコピーしました！",
+        alertCopySuccess: "画像をクリップボードにコピーしました",
+        alertGenerateSuccess: "結合画像を生成しました",
         alertSelectTwoImages: "画像を2枚選択してください",
         copy: "コピー",
         desc: "1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。",
@@ -173,7 +195,8 @@
       en: {
         alertBothFramesFilled: "Both frames are already filled. Please drag and drop two images at once or reset and try again.",
         alertCopyError: "Copy failed: ",
-        alertCopySuccess: "Image copied to clipboard!",
+        alertCopySuccess: "Image copied to clipboard",
+        alertGenerateSuccess: "Combined image generated",
         alertSelectTwoImages: "Please select two images",
         copy: "Copy",
         desc: "Combine relic effect images of slots 1–3 and 4–6 into one image. Please select two images from the relic rites screen or the status screen that you want to combine.",
@@ -241,6 +264,24 @@
         applyLang(e.target.value);
       });
     });
+
+    /********************
+     * トースト通知
+     ********************/
+    function showToast(message, type="info", duration=3000){
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      if(type==="error") toast.style.background="rgba(220,53,69,0.85)";
+      else if(type==="success") toast.style.background="rgba(40,167,69,0.85)";
+      else toast.style.background="rgba(0,0,0,0.85)";
+      toast.style.opacity=1;
+      toast.style.pointerEvents="auto";
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(()=>{
+        toast.style.opacity=0;
+        toast.style.pointerEvents="none";
+      }, duration);
+    }
 
     /********************
      * メイン処理
@@ -384,8 +425,8 @@
     copyBtn.onclick=async()=>{
       const canvas=document.getElementById("canvas");
       canvas.toBlob(async blob=>{
-        try{ await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); alert(t("alertCopySuccess")); }
-        catch(e){ alert(t("alertCopyError")+e);}
+        try{ await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); showToast(t("alertCopySuccess"), "success"); }
+        catch(e){ showToast(t("alertCopyError")+e,"error");}
       },"image/png");
     };
 
@@ -399,7 +440,7 @@
 
     generateBtn.addEventListener("click",async()=>{
       const file1=file1Input.files[0], file2=file2Input.files[0];
-      if(!file1||!file2){ alert(t("alertSelectTwoImages")); return; }
+      if(!file1||!file2){ showToast(t("alertSelectTwoImages"), "error"); return; }
 
       const img1=await loadImage(file1); const img2=await loadImage(file2);
       const crop1=getCropBox(img1);
@@ -414,6 +455,8 @@
       outputImg.src=dataUrl;
       outputImg.style.display="block";
       outputDiv.style.display="block";
+
+      showToast(t("alertGenerateSuccess"), "success");
 
       const now=new Date();
       downloadLink.href=dataUrl;
@@ -462,7 +505,7 @@
           file2Input.files = dt2.files;
           setPreview(files[0], "preview2");
         } else {
-          alert(t("alertBothFramesFilled"));
+          showToast(t("alertBothFramesFilled"), "error");
         }
       }
       // 2枚以上ドロップ → 総入れ替え
