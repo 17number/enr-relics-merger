@@ -463,6 +463,7 @@
       downloadLink.download=`enr_merged_relics_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.jpg`;
       downloadLink.style.display="inline-block";
 
+      document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
       if(isiOS()){
         const infoText = document.createElement("p");
         infoText.textContent = t("longTap");
@@ -472,7 +473,6 @@
         copyBtn.parentNode.insertBefore(infoText, copyBtn.nextSibling);
       } else {
         copyBtn.style.display="inline-block";
-        document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
       }
 
       ocrOutputDiv.style.display="block";
