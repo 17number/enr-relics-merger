@@ -147,7 +147,11 @@
   <!-- トースト通知 -->
   <div id="toast"></div>
 
+  <!-- QRコード -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.min.js"></script>
+  <!-- OCR -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+
   <script>
     /********************
      * 多言語辞書
@@ -183,6 +187,7 @@
         patternRitual: "遺物儀式画面 (デフォルト)",
         patternSelect: "画面タイプを選択",
         patternStatus: "ステータス画面",
+        poweredBy: "Powered by ELDEN RING NIGHTREIGN 遺物画像結合ツール",
         progress: "処理中...",
         relic1_3: "遺物1〜3",
         relic4_6: "遺物4〜6",
@@ -222,6 +227,7 @@
         patternRitual: "Relic Rites Screen (Default)",
         patternSelect: "Select Screen Type",
         patternStatus: "Status Screen",
+        poweredBy: "Powered by ELDEN RING NIGHTREIGN Relic Image Merger",
         progress: "Processing...",
         relic1_3: "Relics 1–3",
         relic4_6: "Relics 4–6",
@@ -438,32 +444,74 @@
       }
     }
 
-    generateBtn.addEventListener("click",async()=>{
-      const file1=file1Input.files[0], file2=file2Input.files[0];
+    generateBtn.addEventListener("click", async () => {
+      const file1 = file1Input.files[0], file2 = file2Input.files[0];
       if(!file1||!file2){ showToast(t("alertSelectTwoImages"), "error"); return; }
 
-      const img1=await loadImage(file1); const img2=await loadImage(file2);
-      const crop1=getCropBox(img1);
-      const crop2=getCropBox(img2);
+      const img1 = await loadImage(file1);
+      const img2 = await loadImage(file2);
+      const crop1 = getCropBox(img1);
+      const crop2 = getCropBox(img2);
 
-      const canvas=document.getElementById("canvas"); canvas.width=crop1.w+crop2.w; canvas.height=Math.max(crop1.h,crop2.h);
-      const ctx=canvas.getContext("2d");
-      ctx.drawImage(img1,crop1.x,crop1.y,crop1.w,crop1.h,0,0,crop1.w,crop1.h);
-      ctx.drawImage(img2,crop2.x,crop2.y,crop2.w,crop2.h,crop1.w,0,crop2.w,crop2.h);
+      // Canvas サイズ（文字＋QRスペース分 高さを少し追加）
+      const qrSize = 80; // QRコードのサイズ
+      const textHeight = 30; // 文字分
+      const canvas = document.getElementById("canvas");
+      canvas.width = crop1.w + crop2.w;
+      canvas.height = Math.max(crop1.h, crop2.h) + Math.max(qrSize, textHeight) + 10; // 10px 余白
+      const ctx = canvas.getContext("2d");
 
-      const dataUrl=canvas.toDataURL("image/jpeg");
-      outputImg.src=dataUrl;
-      outputImg.style.display="block";
-      outputDiv.style.display="block";
+      // 元画像描画
+      ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
+      ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
+
+      // 文字描画
+      const text1 = t("poweredBy");
+      const text2 = `https://17number.github.io/enr-relics-merger/`;
+      ctx.font = "32px sans-serif";
+      ctx.fillStyle = "white";
+      ctx.strokeStyle = "lightskyblue";
+      ctx.textAlign = "left";
+      ctx.strokeText(text1, 10, canvas.height - 50);
+      ctx.fillText(text1, 10, canvas.height - 50);
+      ctx.strokeText(text2, 10, canvas.height - 10);
+      ctx.fillText(text2, 10, canvas.height - 10);
+
+      // QRコード生成
+      const qr = qrcode(0, 'L');
+      qr.addData(text2);
+      qr.make();
+      const qrCanvas = document.createElement("canvas");
+      qrCanvas.width = qrSize;
+      qrCanvas.height = qrSize;
+      const qrCtx = qrCanvas.getContext("2d");
+      const tileW = qrSize / qr.getModuleCount();
+      const tileH = qrSize / qr.getModuleCount();
+      for(let r=0; r<qr.getModuleCount(); r++){
+        for(let c=0; c<qr.getModuleCount(); c++){
+          qrCtx.fillStyle = qr.isDark(r,c) ? "#000000" : "#ffffff";
+          qrCtx.fillRect(c*tileW, r*tileH, tileW, tileH);
+        }
+      }
+      // Canvas に QR を貼り付け（右下）
+      ctx.drawImage(qrCanvas, canvas.width - qrSize - 10, canvas.height - qrSize - 5);
+
+      // 出力画像
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      outputImg.src = dataUrl;
+      outputImg.style.display = "block";
+      outputDiv.style.display = "block";
 
       showToast(t("alertGenerateSuccess"), "success");
 
-      const now=new Date();
-      downloadLink.href=dataUrl;
-      downloadLink.download=`enr_merged_relics_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.jpg`;
-      downloadLink.style.display="inline-block";
+      // ダウンロード設定
+      const now = new Date();
+      downloadLink.href = dataUrl;
+      downloadLink.download = `enr_merged_relics_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}${String(now.getSeconds()).padStart(2,'0')}.jpg`;
+      downloadLink.style.display = "inline-block";
 
-      document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
+      // iOS 対応コピー
+      document.querySelectorAll(".ios-copy-info").forEach(el => el.remove());
       if(isiOS()){
         const infoText = document.createElement("p");
         infoText.textContent = t("longTap");
@@ -475,11 +523,12 @@
         copyBtn.style.display="inline-block";
       }
 
+      // OCR処理
       ocrOutputDiv.style.display="block";
-      try{
-        ocrInner1.textContent = await runOCR(file1,ocrInner1);
-        ocrInner2.textContent = await runOCR(file2,ocrInner2);
-      }catch(e){ ocrOutputDiv.textContent=t("errorOCRFailed")+e; }
+      try {
+        ocrInner1.textContent = await runOCR(file1, ocrInner1);
+        ocrInner2.textContent = await runOCR(file2, ocrInner2);
+      } catch(e) { ocrOutputDiv.textContent = t("errorOCRFailed") + e; }
     });
 
     const dropZone=document.getElementById("drop-zone");
