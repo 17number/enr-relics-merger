@@ -26,6 +26,16 @@ https://17number.github.io/enr-relics-merger/
 
 <img src="images/sample_b3_1-6.jpg" alt="sample_b3" style="width:45vw;">
 
+### パターン3(プリセット画面)
+
+#### 入力画像(プリセット画面)
+
+<img src="images/sample_c1_1-3.jpg" alt="sample_c1" style="width:45vw;"> <img src="images/sample_c2_4-6.jpg" alt="sample_c2" style="width:45vw;">
+
+#### 出力画像(プリセット画面)
+
+<img src="images/sample_c3_1-6.jpg" alt="sample_c3" style="width:45vw;">
+
 ## 要望など
 
 なにかあれば [Issues](https://github.com/17number/enr-relics-merger/issues/new) からご連絡ください。可能な範囲で対応します。

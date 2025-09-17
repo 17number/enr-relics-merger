@@ -54,13 +54,13 @@
 <body>
   <h1 data-i18n="title">ELDEN RING NIGHTREIGN 遺物画像結合ツール</h1>
   <div style="margin-bottom: 1rem;">
-    <span style="margin-right: 8px;">Language:</span>
+    <span>Language:</span>
     <input type="radio" id="lang-ja" name="langSelect" value="ja" checked>
     <label for="lang-ja">🇯🇵 日本語</label>
     <input type="radio" id="lang-en" name="langSelect" value="en">
     <label for="lang-en">🇺🇸 English</label>
   </div>
-  <p style="margin: 0" data-i18n="desc" data-i18n-html>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
+  <p style="margin: 0" data-i18n="desc" data-i18n-html>1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
   <!-- 注意事項 -->
   <details style="margin:10px 0;">
     <summary style="cursor: pointer; color:#007bff;" data-i18n="noteSummary">注意事項 (クリックで展開)</summary>
@@ -80,7 +80,8 @@
     <fieldset>
       <legend data-i18n="patternSelect">画面タイプを選択</legend>
       <input type="radio" name="pattern" id="pattern-ritual" value="ritual" checked><label for="pattern-ritual" data-i18n="patternRitual">遺物儀式画面 (デフォルト)</label><br>
-      <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status" data-i18n="patternStatus">ステータス画面</label>
+      <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status" data-i18n="patternStatus">ステータス画面</label><br>
+      <input type="radio" name="pattern" id="pattern-preset" value="preset"><label for="pattern-preset" data-i18n="patternPreset">プリセット画面</label>
     </fieldset>
   </div>
 
@@ -141,6 +142,14 @@
       <p data-i18n="outputExample">出力例:</p>
       <img src="images/sample_b3_1-6.jpg" alt="サンプル_b3_結合結果">
     </div>
+    <h3 data-i18n="pattern3">パターン3(プリセット画面)</h3>
+    <div class="sample-pattern3">
+      <p data-i18n="inputExample">入力例:</p>
+      <img src="images/sample_c1_1-3.jpg" alt="サンプル_c1">
+      <img src="images/sample_c2_4-6.jpg" alt="サンプル_c2">
+      <p data-i18n="outputExample">出力例:</p>
+      <img src="images/sample_c3_1-6.jpg" alt="サンプル_c3_結合結果">
+    </div>
   </div>
 
   <div class="overlay" id="overlay">
@@ -167,7 +176,7 @@
         alertGenerateSuccess: "結合画像を生成しました",
         alertSelectTwoImages: "画像を2枚選択してください",
         copy: "コピー",
-        desc: `1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい遺物儀式の画像2枚、もしくはステータス画面の画像2枚を選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
+        desc: `1〜3枠、4〜6枠の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
         download: "ダウンロード",
         dropHere: "ここに画像をドラッグ＆ドロップできます (2枚)",
         errorOCRFailed: "OCRに失敗: ",
@@ -188,6 +197,8 @@
         outputExample: "出力例:",
         pattern1: "パターン1(遺物儀式画面)",
         pattern2: "パターン2(ステータス画面)",
+        pattern3: "パターン3(プリセット画面)",
+        patternPreset: "プリセット画面",
         patternRitual: "遺物儀式画面 (デフォルト)",
         patternSelect: "画面タイプを選択",
         patternStatus: "ステータス画面",
@@ -208,7 +219,7 @@
         alertGenerateSuccess: "Combined image generated",
         alertSelectTwoImages: "Please select two images",
         copy: "Copy",
-        desc: `Combine relic effect images of slots 1–3 and 4–6 into one image. Please select two images from the relic rites screen or the status screen that you want to combine. ( <a href="#sample" style="padding: 0;">Examples</a>)`,
+        desc: `Combine relic effect images of slots 1–3 and 4–6 into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. ( <a href="#sample" style="padding: 0;">Examples</a>)`,
         download: "Download",
         dropHere: "Drag & Drop images here (2 images)",
         errorOCRFailed: "OCR failed: ",
@@ -229,6 +240,8 @@
         outputExample: "Output Example:",
         pattern1: "Pattern 1 (Relic Rites Screen)",
         pattern2: "Pattern 2 (Status Screen)",
+        pattern3: "Pattern 3 (Preset Screen)",
+        patternPreset: "Preset Screen",
         patternRitual: "Relic Rites Screen (Default)",
         patternSelect: "Select Screen Type",
         patternStatus: "Status Screen",
@@ -407,11 +420,14 @@
     }
 
     function getOcrCropBox(img) {
-      if(selectedPattern==="ritual"){
+      if (selectedPattern==="ritual"){
         return { x: img.width*0.075, y: img.height*0.385, w: img.width*(0.325-0.075), h: img.height*(0.925-0.385) };
-      } else {
+      } else if (selectedPattern==="status"){
         return { x: img.width*0.425, y: img.height*0.27, w: img.width*0.325, h: img.height*0.58 };
+      } else if (selectedPattern==="preset"){
+        return { x: img.width*0.5, y: img.height*0.15, w: img.width*0.4, h: img.height*0.305 };
       }
+      return { x: 0, y: 0, w: 0, h: 0 };
     }
 
     async function runOCR(file, outputDiv){
@@ -445,9 +461,12 @@
     function getCropBox(img) {
       if(selectedPattern==="ritual"){
         return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.325, h: img.height*0.8125 };
-      } else {
+      } else if (selectedPattern==="status") {
         return { x: img.width*0.35, y: img.height*0.27, w: img.width*0.40, h: img.height*0.58 };
+      } else if (selectedPattern==="preset") {
+        return { x: img.width*0.41, y: img.height*0.14, w: img.width*0.4, h: img.height*0.725 };
       }
+      return { x: 0, y: 0, w: 0, h: 0 };
     }
 
     generateBtn.addEventListener("click", async () => {
