@@ -152,6 +152,9 @@
     </div>
   </div>
 
+  <!-- バージョン情報表示エリア -->
+  <div id="version" style="font-size: 0.9em; color: #666; margin-top: 1rem; text-align: center;"></div>
+
   <div class="overlay" id="overlay">
     <img id="overlay-img" src="">
   </div>
@@ -619,6 +622,17 @@
     enableOverlay("#preview1, #preview2, #output-img, .sample-area img");
     const overlay=document.getElementById("overlay");
     overlay.addEventListener("click",()=>overlay.classList.remove("active"));
+
+    // バージョン情報取得・表示
+    fetch("./version.json")
+      .then(res => res.json())
+      .then(v => {
+        const hash = v.hash;
+        const date = new Date(v.date).toLocaleString();
+        document.getElementById("version").textContent =
+          `Commit: ${hash} (${date})`;
+      })
+      .catch(() => {});
   </script>
 </body>
 </html>
