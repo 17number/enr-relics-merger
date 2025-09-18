@@ -1,5 +1,8 @@
 name: Update version.json
 
+permissions:
+  contents: write
+
 on:
   push:
     branches:
@@ -15,6 +18,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
 
       - name: Get commit info
         id: commit
