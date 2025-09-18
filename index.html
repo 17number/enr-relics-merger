@@ -427,7 +427,7 @@
       updateGenerateButton();
     });
 
-    resetBtn.addEventListener("click",()=>{
+    function handleReset(){
       file1Input.value=""; file2Input.value="";
       outputDiv.style.display="none";
       document.querySelectorAll("#preview1, #preview2, #output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
@@ -437,7 +437,8 @@
       document.querySelectorAll("#copy, #download").forEach(btn=>{ btn.style.display="none"; });
       document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
       updateGenerateButton();
-    });
+    };
+    resetBtn.addEventListener("click",handleReset);
 
     async function preprocessImage(file){
       const img = await loadImage(file);
@@ -510,6 +511,12 @@
       const file1 = file1Input.files[0], file2 = file2Input.files[0];
       if(!file1||!file2){ showToast(t("alertSelectTwoImages"), "error"); return; }
 
+      // 一部要素を初期化
+      document.querySelectorAll("#output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
+      document.getElementById("canvas").getContext("2d").clearRect(0,0,document.getElementById("canvas").width,document.getElementById("canvas").height);
+      ocrOutputDiv.style.display="none";
+      document.querySelectorAll("#ocr-output-inner1, #ocr-output-inner2").forEach(div=>{ div.textContent=""; });
+
       const img1 = await loadImage(file1);
       const img2 = await loadImage(file2);
       const crop1 = getCropBox(img1);
@@ -518,12 +525,14 @@
       // Canvas サイズ（文字＋QRスペース分 高さを少し追加）
       const canvas = document.getElementById("canvas");
       canvas.width = crop1.w + crop2.w;
+      const baseHeight = crop1.h;
+      const multiplier = Math.min(crop1.w, baseHeight) / Math.max(crop1.w, baseHeight);
+      const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
+      const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
       if (!addTextQrCheckbox.checked) {
         canvas.height = Math.max(crop1.h, crop2.h);
       } else {
-        const qrSize = 80; // QRコードのサイズ
-        const textHeight = 30; // 文字分
-        canvas.height = Math.max(crop1.h, crop2.h) + Math.max(qrSize, textHeight) + 10; // 10px 余白
+        canvas.height = Math.max(crop1.h, crop2.h) + Math.max(qrSize, fontSize) + 10; // 10px 余白
       }
 
       const ctx = canvas.getContext("2d");
@@ -536,17 +545,16 @@
         // 文字描画
         const text1 = t("generatedBy");
         const text2 = `https://17number.github.io/enr-relics-merger/`;
-        ctx.font = "32px sans-serif";
+        ctx.font = `${fontSize}px sans-serif`;
         ctx.fillStyle = "white";
         ctx.strokeStyle = "lightskyblue";
         ctx.textAlign = "left";
-        ctx.strokeText(text1, 10, canvas.height - 50);
-        ctx.fillText(text1, 10, canvas.height - 50);
-        ctx.strokeText(text2, 10, canvas.height - 10);
-        ctx.fillText(text2, 10, canvas.height - 10);
+        ctx.strokeText(text1, fontSize * 0.5, canvas.height - (fontSize * 2.0));
+        ctx.fillText(text1, fontSize * 0.5, canvas.height - (fontSize * 2.0));
+        ctx.strokeText(text2, fontSize * 0.5, canvas.height - (fontSize * 0.5));
+        ctx.fillText(text2, fontSize * 0.5, canvas.height - (fontSize * 0.5));
 
         // QRコード生成
-        const qrSize = 80; // QRコードのサイズ
         const qr = qrcode(0, 'L');
         qr.addData(text2);
         qr.make();
