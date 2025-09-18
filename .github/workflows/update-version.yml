@@ -1,4 +1,4 @@
-name: Update version.json
+name: Update version.json and sitemap.xml
 
 permissions:
   contents: write
@@ -9,6 +9,7 @@ on:
       - main
     paths-ignore:
       - "version.json"
+      - "sitemap.xml"
 
 jobs:
   update-version:
@@ -30,10 +31,30 @@ jobs:
         run: |
           echo "{\"date\": \"${{ steps.commit.outputs.date }}\", \"hash\": \"${{ steps.commit.outputs.hash }}\"}" > version.json
 
-      - name: Commit and push version.json
+      - name: Update sitemap.xml
+        run: |
+          DATE="${{ steps.commit.outputs.date }}"
+          SITEMAP="sitemap.xml"
+
+          if [ ! -f "$SITEMAP" ]; then
+            echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP
+            echo '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP
+            echo "  <url>" >> $SITEMAP
+            echo "    <loc>https://17number.github.io/enr-relics-merger/</loc>" >> $SITEMAP
+            echo "    <lastmod>$DATE</lastmod>" >> $SITEMAP
+            echo "    <changefreq>weekly</changefreq>" >> $SITEMAP
+            echo "    <priority>1.0</priority>" >> $SITEMAP
+            echo "  </url>" >> $SITEMAP
+            echo '</urlset>' >> $SITEMAP
+          else
+            # lastmod を更新
+            sed -i "s|<lastmod>.*</lastmod>|<lastmod>$DATE</lastmod>|" $SITEMAP
+          fi
+
+      - name: Commit and push updates
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add version.json
-          git commit -m "Update version.json [skip ci]" || echo "No changes to commit"
+          git add version.json sitemap.xml
+          git commit -m "Update version.json and sitemap.xml [skip ci]" || echo "No changes to commit"
           git push
