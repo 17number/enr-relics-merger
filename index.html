@@ -11,7 +11,7 @@
   <style>
     body { font-family: "Segoe UI", sans-serif; padding: 20px; background: #f8f9fa; color:#333; font-size: 16px; }
     h1 { font-size: 1.4rem; }
-    .input-area { display: flex; gap: 20px; flex-wrap: wrap; }
+    .input-area { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 0.5rem; }
     .pattern-block input[type="radio"], .pattern-block label { cursor: pointer; }
     .file-block { flex: 1; min-width: 200px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .file-block h3 { margin: 0 0 8px; font-size: 1rem; }
@@ -91,15 +91,7 @@
 
   <h2 data-i18n="mergeSettings">結合画像設定</h2>
 
-  <!-- 画面タイプ選択 -->
-  <div class="pattern-block" style="margin-bottom: 0.5rem">
-    <fieldset>
-      <legend data-i18n="patternSelect">画面タイプ</legend>
-      <input type="radio" name="pattern" id="pattern-ritual" value="ritual" checked><label for="pattern-ritual" data-i18n="patternRitual">遺物儀式画面</label><br>
-      <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status" data-i18n="patternStatus">ステータス画面</label><br>
-      <input type="radio" name="pattern" id="pattern-preset" value="preset"><label for="pattern-preset" data-i18n="patternPreset">プリセット画面</label>
-    </fieldset>
-  </div>
+  <div class="drop-zone" id="drop-zone" data-i18n="dropHere">ここに画像をドラッグ＆ドロップできます (2枚)</div>
 
   <div class="input-area">
     <div class="file-block">
@@ -114,7 +106,15 @@
     </div>
   </div>
 
-  <div class="drop-zone" id="drop-zone" data-i18n="dropHere">ここに画像をドラッグ＆ドロップできます (2枚)</div>
+  <!-- 画面タイプ選択 -->
+  <div class="pattern-block" style="margin-bottom: 0.5rem">
+    <fieldset>
+      <legend data-i18n="patternSelect">画面タイプ</legend>
+      <input type="radio" name="pattern" id="pattern-ritual" value="ritual" checked><label for="pattern-ritual" data-i18n="patternRitual">遺物儀式画面</label><br>
+      <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status" data-i18n="patternStatus">ステータス画面</label><br>
+      <input type="radio" name="pattern" id="pattern-preset" value="preset"><label for="pattern-preset" data-i18n="patternPreset">プリセット画面</label>
+    </fieldset>
+  </div>
 
   <button id="swap" data-i18n="swap">画像入れ替え</button>
   <button id="reset" data-i18n="reset">リセット</button>
@@ -195,7 +195,7 @@
         alertCopyError: "コピー失敗: ",
         alertCopySuccess: "画像をクリップボードにコピーしました",
         alertGenerateSuccess: "結合画像を生成しました",
-        alertSelectTwoImages: "画像を2枚選択してください",
+        alertSelectTwoImages: "2枚目の画像を選択してください",
         copy: "コピー",
         desc: `遺物(1〜3枠)、深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
         download: "ダウンロード",
@@ -235,7 +235,7 @@
         alertCopyError: "Copy failed: ",
         alertCopySuccess: "Image copied to clipboard",
         alertGenerateSuccess: "Combined image generated",
-        alertSelectTwoImages: "Please select two images",
+        alertSelectTwoImages: "Please select the second image",
         copy: "Copy",
         desc: `Combine relic effect images of relic(slots 1–3) and depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. ( <a href="#sample" style="padding: 0;">Examples</a>)`,
         download: "Download",
@@ -347,6 +347,8 @@
       });
     });
 
+    addTextQrCheckbox.addEventListener("change", generateMergedImage);
+
     async function loadImage(file){
       return new Promise((resolve,reject)=>{
         const reader=new FileReader();
@@ -451,7 +453,8 @@
 
     async function generateMergedImage() {
       const file1 = file1Input.files[0], file2 = file2Input.files[0];
-      if(!file1||!file2){ showToast(t("alertSelectTwoImages"), "error"); return; }
+      if(!file1&&!file2){ return; }
+      else if(!file1||!file2){ showToast(t("alertSelectTwoImages"),"info"); return; }
 
       // 一部要素を初期化
       document.querySelectorAll("#output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
