@@ -76,7 +76,7 @@
     <input type="radio" id="lang-en" name="langSelect" value="en">
     <label for="lang-en">🇺🇸 English</label>
   </div>
-  <p style="margin: 0" data-i18n="desc" data-i18n-html>遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
+  <p style="margin: 0" data-i18n="desc" data-i18n-html>遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
   <!-- 注意事項 -->
   <details style="margin:10px 0;">
     <summary style="cursor: pointer; color:#007bff;" data-i18n="noteSummary">注意事項 (クリックで展開)</summary>
@@ -195,12 +195,13 @@
     const i18n = {
       ja: {
         alertBothFramesFilled: "既に両方の枠が埋まっています。2枚まとめてドラッグ＆ドロップするか、リセットしてやり直してください。",
+        alertBothFramesFilledForPaste: "既に両方の枠が埋まっています。リセットしてやり直してください。",
         alertCopyError: "コピー失敗: ",
         alertCopySuccess: "画像をクリップボードにコピーしました",
         alertGenerateSuccess: "結合画像を生成しました",
         alertSelectTwoImages: "2枚目の画像を選択してください",
         copy: "コピー",
-        desc: `遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
+        desc: `遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
         download: "ダウンロード",
         download_name: "ダウンロードファイル名 (省略可)",
         dropHere: "ここに画像をドラッグ＆ドロップできます (2枚)",
@@ -235,12 +236,13 @@
       },
       en: {
         alertBothFramesFilled: "Both frames are already filled. Please drag and drop two images at once or reset and try again.",
+        alertBothFramesFilledForPaste: "Both frames are already filled. Please reset and try again.",
         alertCopyError: "Copy failed: ",
         alertCopySuccess: "Image copied to clipboard",
         alertGenerateSuccess: "Combined image generated",
         alertSelectTwoImages: "Please select the second image",
         copy: "Copy",
-        desc: `Combine relic effect images of relic(slots 1–3) and deep of night depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. ( <a href="#sample" style="padding: 0;">Examples</a>)`,
+        desc: `Combine relic effect images of relic(slots 1–3) and deep of night depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. Image data can also be pasted (Win: Ctrl+v, Mac: ⌘+v). ( <a href="#sample" style="padding: 0;">Examples</a>)`,
         download: "Download",
         download_name: "Download File Name (Optional)",
         dropHere: "Drag & Drop images here (2 images)",
@@ -378,6 +380,37 @@
 
     file1Input.addEventListener("change",()=>{ setPreview(file1Input.files[0],"preview1","reset1"); generateMergedImage(); });
     file2Input.addEventListener("change",()=>{ setPreview(file2Input.files[0],"preview2","reset2"); generateMergedImage(); });
+
+    /**
+     * ペースト
+     */
+    document.addEventListener('paste', (e) => {
+      const file1 = file1Input.files[0], file2 = file2Input.files[0];
+      if(file1&&file2){
+        showToast(t("alertBothFramesFilledForPaste"), "error");
+        return;
+      }
+
+      const items = e.clipboardData.items;
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile();
+          if(!file1) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            file1Input.files = dt.files;
+            setPreview(file1Input.files[0],"preview1","reset1");
+            generateMergedImage();
+          } else if(!file2) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            file2Input.files = dt.files;
+            setPreview(file2Input.files[0],"preview2","reset2");
+            generateMergedImage();
+          }
+        }
+      }
+    });
 
     swapBtn.addEventListener("click", () => {
       // ファイルオブジェクトを入れ替え
