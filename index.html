@@ -13,11 +13,11 @@
     h1 { font-size: 1.4rem; }
     .input-area { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 0.5rem; }
     .pattern-block input[type="radio"], .pattern-block label { cursor: pointer; }
-    .file-block { flex: 1; min-width: 200px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .file-block { flex: 1; min-width: 200px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border: 2px dashed #999; }
     .file-block h3 { margin: 0 0 8px; font-size: 1rem; }
     .preview { display:block; max-width: min(400px, 80vw); max-height: 400px; margin-top: 10px; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; }
     .drop-zone { border: 2px dashed #999; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center; color: #666; background:#fff; }
-    .drop-zone.dragover { border-color: #333; background: #f0f0f0; }
+    .drop-zone.dragover { border-color: #3399ff; background: #3399ff33; }
     button, a { margin: 10px 5px 20px 0; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; }
     #swap { background:#3399ff; color:#fff; }
     #reset, #reset1, #reset2 { background:#dc3545; color:#fff; }
@@ -76,7 +76,7 @@
     <input type="radio" id="lang-en" name="langSelect" value="en">
     <label for="lang-en">🇺🇸 English</label>
   </div>
-  <p style="margin: 0" data-i18n="desc" data-i18n-html>遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
+  <p style="margin: 0" data-i18n="desc" data-i18n-html>遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。ドラッグ＆ドロップ、画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)</p>
   <!-- 注意事項 -->
   <details style="margin:10px 0;">
     <summary style="cursor: pointer; color:#007bff;" data-i18n="noteSummary">注意事項 (クリックで展開)</summary>
@@ -95,13 +95,13 @@
   <div class="drop-zone" id="drop-zone" data-i18n="dropHere">ここに画像をドラッグ＆ドロップできます (2枚)</div>
 
   <div class="input-area">
-    <div class="file-block">
+    <div class="file-block" id="file-block1">
       <h3 data-i18n="relic1_3">遺物1〜3</h3>
       <input type="file" id="file1" accept="image/*">
       <img id="preview1" class="preview" alt="プレビュー1" style="display:none;">
       <button id="reset1" data-i18n="reset" style="display: none;">リセット</button>
     </div>
-    <div class="file-block">
+    <div class="file-block" id="file-block2">
       <h3 data-i18n="relic4_6">遺物4〜6</h3>
       <input type="file" id="file2" accept="image/*">
       <img id="preview2" class="preview" alt="プレビュー2" style="display:none;">
@@ -201,7 +201,7 @@
         alertGenerateSuccess: "結合画像を生成しました",
         alertSelectTwoImages: "2枚目の画像を選択してください",
         copy: "コピー",
-        desc: `遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
+        desc: `遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。ドラッグ＆ドロップ、画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。( <a href="#sample" style="padding: 0;">サンプル</a>)`,
         download: "ダウンロード",
         download_name: "ダウンロードファイル名 (省略可)",
         dropHere: "ここに画像をドラッグ＆ドロップできます (2枚)",
@@ -242,7 +242,7 @@
         alertGenerateSuccess: "Combined image generated",
         alertSelectTwoImages: "Please select the second image",
         copy: "Copy",
-        desc: `Combine relic effect images of relic(slots 1–3) and deep of night depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. Image data can also be pasted (Win: Ctrl+v, Mac: ⌘+v). ( <a href="#sample" style="padding: 0;">Examples</a>)`,
+        desc: `Combine relic effect images of relic(slots 1–3) and deep of night depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. Drag & drop and image data can also be pasted (Win: Ctrl+v, Mac: ⌘+v). ( <a href="#sample" style="padding: 0;">Examples</a>)`,
         download: "Download",
         download_name: "Download File Name (Optional)",
         dropHere: "Drag & Drop images here (2 images)",
@@ -332,8 +332,14 @@
     /********************
      * メイン処理
      ********************/
+    const fileBlock1 = document.getElementById("file-block1");
+    const fileBlock2 = document.getElementById("file-block2");
     const file1Input = document.getElementById("file1");
     const file2Input = document.getElementById("file2");
+    const preview1 = document.getElementById("preview1");
+    const preview2 = document.getElementById("preview2");
+    const reset1 = document.getElementById("reset1");
+    const reset2 = document.getElementById("reset2");
     const swapBtn = document.getElementById("swap");
     const resetBtn = document.getElementById("reset");
     const addTextQrCheckbox = document.getElementById("add-text-qr");
@@ -367,19 +373,18 @@
       });
     }
 
-    function setPreview(file, previewId, resetId){
+    function setPreview(file, preview, reset){
       const reader=new FileReader();
       reader.onload=e=>{
-        const img=document.getElementById(previewId);
-        img.src=e.target.result; img.style.display="block";
-
-        document.getElementById(resetId).style.display="inline-block";
+        preview.src=e.target.result;
+        preview.style.display="block";
+        reset.style.display="inline-block";
       };
       reader.readAsDataURL(file);
     }
 
-    file1Input.addEventListener("change",()=>{ setPreview(file1Input.files[0],"preview1","reset1"); generateMergedImage(); });
-    file2Input.addEventListener("change",()=>{ setPreview(file2Input.files[0],"preview2","reset2"); generateMergedImage(); });
+    file1Input.addEventListener("change",()=>{ setPreview(file1Input.files[0],preview1,reset1); generateMergedImage(); });
+    file2Input.addEventListener("change",()=>{ setPreview(file2Input.files[0],preview2,reset2); generateMergedImage(); });
 
     /**
      * ペースト
@@ -399,13 +404,13 @@
             const dt = new DataTransfer();
             dt.items.add(file);
             file1Input.files = dt.files;
-            setPreview(file1Input.files[0],"preview1","reset1");
+            setPreview(file1Input.files[0],preview1,reset1);
             generateMergedImage();
           } else if(!file2) {
             const dt = new DataTransfer();
             dt.items.add(file);
             file2Input.files = dt.files;
-            setPreview(file2Input.files[0],"preview2","reset2");
+            setPreview(file2Input.files[0],preview2,reset2);
             generateMergedImage();
           }
         }
@@ -419,17 +424,17 @@
       file2Input.files = tempFiles;
 
       // プレビューも入れ替え
-      const tempSrc = document.getElementById("preview1").src;
-      document.getElementById("preview1").src = document.getElementById("preview2").src;
-      document.getElementById("preview2").src = tempSrc;
+      const tempSrc = preview1.src;
+      preview1.src = preview2.src;
+      preview2.src = tempSrc;
 
       // プレビュー表示制御
-      document.getElementById("preview1").style.display = file1Input.files[0] ? "block" : "none";
-      document.getElementById("preview2").style.display = file2Input.files[0] ? "block" : "none";
+      preview1.style.display = file1Input.files[0] ? "block" : "none";
+      preview2.style.display = file2Input.files[0] ? "block" : "none";
 
       // リセットボタン表示制御
-      document.getElementById("reset1").style.display = file1Input.files[0] ? "inline-block" : "none";
-      document.getElementById("reset2").style.display = file2Input.files[0] ? "inline-block" : "none";
+      reset1.style.display = file1Input.files[0] ? "inline-block" : "none";
+      reset2.style.display = file2Input.files[0] ? "inline-block" : "none";
 
       generateMergedImage();
     });
@@ -603,9 +608,15 @@
       }
     }
 
+    // ドラッグ＆ドロップ
     const dropZone=document.getElementById("drop-zone");
-    dropZone.addEventListener("dragover",e=>{ e.preventDefault(); dropZone.classList.add("dragover"); });
-    dropZone.addEventListener("dragleave",()=>{ dropZone.classList.remove("dragover"); });
+    dropZone.addEventListener("dragover",e=>{
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave",()=>{
+      dropZone.classList.remove("dragover");
+    });
     dropZone.addEventListener("drop", e => {
       e.preventDefault();
       dropZone.classList.remove("dragover");
@@ -619,12 +630,12 @@
           const dt1 = new DataTransfer();
           dt1.items.add(files[0]);
           file1Input.files = dt1.files;
-          setPreview(files[0], "preview1", "reset1");
+          setPreview(files[0], preview1, reset1);
         } else if(!file2Input.files[0]){
           const dt2 = new DataTransfer();
           dt2.items.add(files[0]);
           file2Input.files = dt2.files;
-          setPreview(files[0], "preview2", "reset2");
+          setPreview(files[0], preview2, reset2);
         } else {
           showToast(t("alertBothFramesFilled"), "error");
         }
@@ -637,12 +648,52 @@
         dt2.items.add(files[1]);
         file1Input.files = dt1.files;
         file2Input.files = dt2.files;
-        setPreview(files[0], "preview1", "reset1");
-        setPreview(files[1], "preview2", "reset2");
+        setPreview(files[0], preview1, reset1);
+        setPreview(files[1], preview2, reset2);
       }
 
       generateMergedImage();
     });
+
+    // 個別ドラッグ＆ドロップ
+    function enableDropOnBlock(blockEl, previewEl, resetEl, fileInput) {
+      // ドラッグ中の見た目を変える
+      blockEl.addEventListener("dragover", e => {
+        e.preventDefault();
+        blockEl.style.border = "2px dashed #3399ff";
+        blockEl.style.background = "#3399ff33";
+      });
+
+      blockEl.addEventListener("dragleave", () => {
+        blockEl.style.border = "";
+        blockEl.style.background = "";
+      });
+
+      // ドロップされたときの処理
+      blockEl.addEventListener("drop", e => {
+        e.preventDefault();
+        blockEl.style.border = "";
+        blockEl.style.background = "";
+        if (!e.dataTransfer.files.length) return;
+
+        const file = e.dataTransfer.files[0];
+        if (!file.type.startsWith("image/")) return;
+
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          fileInput.files = dt.files;
+          setPreview(fileInput.files[0], previewEl, resetEl);
+          generateMergedImage();
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // .file-block をドロップ対象にする
+    enableDropOnBlock(fileBlock1, preview1, reset1, file1Input);
+    enableDropOnBlock(fileBlock2, preview2, reset2, file2Input);
 
     // オーバーレイ
     function enableOverlay(selector) {
