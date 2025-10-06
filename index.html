@@ -519,7 +519,16 @@
     copyBtn.onclick=async()=>{
       const canvas=document.getElementById("canvas");
       canvas.toBlob(async blob=>{
-        try{ await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]); showToast(t("alertCopySuccess"), "success"); }
+        try{
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
+          showToast(t("alertCopySuccess"), "success");
+          gtag('event', 'clipboard_copy', {
+            event_category: 'ui_action',
+            event_label: 'Copy Button',
+            pattern: selectedPattern,
+            qr: addTextQrCheckbox.checked ? 'on' : 'off',
+          });
+        }
         catch(e){ showToast(t("alertCopyError")+e,"error");}
       },"image/png");
     };
@@ -561,6 +570,14 @@
 
       // ダウンロード実行
       e.target.click();
+
+      gtag('event', 'download_image', {
+        event_category: 'ui_action',
+        event_label: 'Download Image',
+        pattern: selectedPattern,
+        qr: addTextQrCheckbox.checked ? 'on' : 'off',
+        file_name: userCustomName || 'default',
+      });
     }
     downloadLink.addEventListener("click", handleClickDownloadLink);
 
@@ -660,6 +677,13 @@
         infoText.classList.add("ios-copy-info");
         copyBtn.parentElement.insertAdjacentElement("beforeend", infoText);
       }
+
+      gtag('event', 'merge_image', {
+        event_category: 'ui_action',
+        event_label: 'Merge Image',
+        pattern: selectedPattern,
+        qr: addTextQrCheckbox.checked ? 'on' : 'off',
+      });
     }
 
     // ドラッグ＆ドロップ
