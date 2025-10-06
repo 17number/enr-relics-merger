@@ -576,7 +576,7 @@
         event_label: 'Download Image',
         pattern: selectedPattern,
         qr: addTextQrCheckbox.checked ? 'on' : 'off',
-        file_name: userCustomName || 'default',
+        file_name: userCustomName ? 'custom' : 'default',
       });
     }
     downloadLink.addEventListener("click", handleClickDownloadLink);
