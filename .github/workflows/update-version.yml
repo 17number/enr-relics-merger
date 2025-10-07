@@ -36,12 +36,10 @@ jobs:
           DATE="${{ steps.commit.outputs.date }}"
           SITEMAP="sitemap.xml"
 
-          cat > $SITEMAP <<EOF
+          cat <<EOF > "$SITEMAP"
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="https://www.w3.org/1999/xhtml">
-
-  <!-- 日本語トップページ -->
   <url>
     <loc>https://17number.github.io/enr-relics-merger/</loc>
     <lastmod>$DATE</lastmod>
@@ -51,7 +49,6 @@ jobs:
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
   </url>
 
-  <!-- 日本語プライバシーポリシー -->
   <url>
     <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>
     <lastmod>$DATE</lastmod>
@@ -61,7 +58,6 @@ jobs:
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
   </url>
 
-  <!-- 英語トップページ -->
   <url>
     <loc>https://17number.github.io/enr-relics-merger/en/</loc>
     <lastmod>$DATE</lastmod>
@@ -71,7 +67,6 @@ jobs:
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
   </url>
 
-  <!-- 英語プライバシーポリシー -->
   <url>
     <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>
     <lastmod>$DATE</lastmod>
