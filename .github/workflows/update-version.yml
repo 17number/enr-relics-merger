@@ -36,7 +36,7 @@ jobs:
           DATE="${{ steps.commit.outputs.date }}"
           SITEMAP="sitemap.xml"
 
-          cat <<EOF > "$SITEMAP"
+cat <<EOF > "$SITEMAP"
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="https://www.w3.org/1999/xhtml">
