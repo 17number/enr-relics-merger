@@ -1,9 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="https://www.w3.org/1999/xhtml">
   <url>
     <loc>https://17number.github.io/enr-relics-merger/</loc>
-    <lastmod>2025-10-07T22:07:32+09:00</lastmod>
+    <lastmod>2025-10-07T22:29:20+09:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
+  </url>
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>
+    <lastmod>2025-10-07T22:29:20+09:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
+  </url>
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/en/</loc>
+    <lastmod>2025-10-07T22:29:20+09:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
+  </url>
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>
+    <lastmod>2025-10-07T22:29:20+09:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
   </url>
 </urlset>
