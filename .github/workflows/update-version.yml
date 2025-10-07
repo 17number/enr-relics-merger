@@ -36,7 +36,7 @@ jobs:
           DATE="${{ steps.commit.outputs.date }}"
           SITEMAP="sitemap.xml"
 
-cat <<EOF > "$SITEMAP"
+          cat <<EOF > "$SITEMAP"
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xhtml="https://www.w3.org/1999/xhtml">
@@ -48,16 +48,14 @@ cat <<EOF > "$SITEMAP"
     <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
   </url>
-
   <url>
     <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>
     <lastmod>$DATE</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
   </url>
-
   <url>
     <loc>https://17number.github.io/enr-relics-merger/en/</loc>
     <lastmod>$DATE</lastmod>
@@ -66,16 +64,14 @@ cat <<EOF > "$SITEMAP"
     <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
   </url>
-
   <url>
     <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>
     <lastmod>$DATE</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
     <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
     <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
   </url>
-
 </urlset>
 EOF
 
