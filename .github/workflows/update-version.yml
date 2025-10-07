@@ -36,20 +36,53 @@ jobs:
           DATE="${{ steps.commit.outputs.date }}"
           SITEMAP="sitemap.xml"
 
-          if [ ! -f "$SITEMAP" ]; then
-            echo '<?xml version="1.0" encoding="UTF-8"?>' > $SITEMAP
-            echo '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9">' >> $SITEMAP
-            echo "  <url>" >> $SITEMAP
-            echo "    <loc>https://17number.github.io/enr-relics-merger/</loc>" >> $SITEMAP
-            echo "    <lastmod>$DATE</lastmod>" >> $SITEMAP
-            echo "    <changefreq>weekly</changefreq>" >> $SITEMAP
-            echo "    <priority>1.0</priority>" >> $SITEMAP
-            echo "  </url>" >> $SITEMAP
-            echo '</urlset>' >> $SITEMAP
-          else
-            # lastmod を更新
-            sed -i "s|<lastmod>.*</lastmod>|<lastmod>$DATE</lastmod>|" $SITEMAP
-          fi
+          cat > $SITEMAP <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="https://www.w3.org/1999/xhtml">
+
+  <!-- 日本語トップページ -->
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/</loc>
+    <lastmod>$DATE</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
+  </url>
+
+  <!-- 日本語プライバシーポリシー -->
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>
+    <lastmod>$DATE</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
+  </url>
+
+  <!-- 英語トップページ -->
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/en/</loc>
+    <lastmod>$DATE</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
+  </url>
+
+  <!-- 英語プライバシーポリシー -->
+  <url>
+    <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>
+    <lastmod>$DATE</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
+  </url>
+
+</urlset>
+EOF
 
       - name: Commit and push updates
         run: |
