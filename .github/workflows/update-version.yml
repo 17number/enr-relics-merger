@@ -36,44 +36,46 @@ jobs:
           DATE="${{ steps.commit.outputs.date }}"
           SITEMAP="sitemap.xml"
 
-          cat <<EOF > "$SITEMAP"
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xhtml="https://www.w3.org/1999/xhtml">
-  <url>
-    <loc>https://17number.github.io/enr-relics-merger/</loc>
-    <lastmod>$DATE</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
-  </url>
-  <url>
-    <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>
-    <lastmod>$DATE</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
-  </url>
-  <url>
-    <loc>https://17number.github.io/enr-relics-merger/en/</loc>
-    <lastmod>$DATE</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />
-  </url>
-  <url>
-    <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>
-    <lastmod>$DATE</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />
-  </url>
-</urlset>
-EOF
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > "$SITEMAP"
+          echo '<urlset xmlns="https://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="https://www.w3.org/1999/xhtml">' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-merger/</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>weekly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>1.0</priority>' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-merger/privacy.html</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>monthly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>0.8</priority>' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-merger/en/</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>weekly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>1.0</priority>' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/" />' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/" />' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '  <url>' >> "$SITEMAP"
+          echo '    <loc>https://17number.github.io/enr-relics-merger/en/privacy.html</loc>' >> "$SITEMAP"
+          echo "    <lastmod>$DATE</lastmod>" >> "$SITEMAP"
+          echo '    <changefreq>monthly</changefreq>' >> "$SITEMAP"
+          echo '    <priority>0.8</priority>' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="ja" href="https://17number.github.io/enr-relics-merger/privacy.html" />' >> "$SITEMAP"
+          echo '    <xhtml:link rel="alternate" hreflang="en" href="https://17number.github.io/enr-relics-merger/en/privacy.html" />' >> "$SITEMAP"
+          echo '  </url>' >> "$SITEMAP"
+
+          echo '</urlset>' >> "$SITEMAP"
 
       - name: Commit and push updates
         run: |
