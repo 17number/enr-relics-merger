@@ -92,7 +92,7 @@ const i18n = {
 
 function judgeLang() {
   const url = new URL(location.href);
-  return url.pathname.match(/\/(en)\/?/) ? "en" : "ja";
+  return url.pathname.match(/\/en\/?$/) ? "en" : "ja";
 }
 
 function t(key) {
