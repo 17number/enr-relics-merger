@@ -8,25 +8,30 @@ insertScriptForQR();
 
 // Google Analytics
 let gtag = () => {};
-function insertScriptForGA(){
+function insertScriptForGA() {
   if (isOptOutGA()) return;
 
+  window.dataLayer = window.dataLayer || [];
+  gtag = function(){dataLayer.push(arguments);};
+
+  // スクリプト読み込み完了後に初期化
   const script = document.createElement("script");
   script.src = "https://www.googletagmanager.com/gtag/js?id=G-BN1ZV55K0M";
   script.async = true;
+  script.onload = () => {
+    gtag('js', new Date());
+    gtag('config', 'G-BN1ZV55K0M', { anonymize_ip: true });
+  };
   document.head.appendChild(script);
-  window.dataLayer = window.dataLayer || [];
-  gtag = () => {dataLayer.push(arguments);};
-  gtag('js', new Date());
-  gtag('config', 'G-BN1ZV55K0M', { 'anonymize_ip': true });
 }
 insertScriptForGA();
 
 function isOptOutGA(){
   const url = new URL(location.href);
-  // 本番環境以外は除外
-  const isNotProduction = url.hostname !== "17number.github.io" || !url.pathname.startsWith("/enr-relics-merger/");
-  // 特定クエリパラメータ(ga_off)がある場合は除外
+  const isNotProduction = (
+    url.hostname !== "17number.github.io" ||
+    !url.pathname.startsWith("/enr-relics-merger")
+  );
   const ignoreGA = url.searchParams.has("ga_off");
   return isNotProduction || ignoreGA;
 }
