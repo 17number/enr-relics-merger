@@ -1,3 +1,36 @@
+// QR コード
+function insertScriptForQR(){
+  const script=document.createElement("script");
+  script.src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.min.js";
+  document.head.appendChild(script);
+}
+insertScriptForQR();
+
+// Google Analytics
+let gtag = () => {};
+function insertScriptForGA(){
+  if (isOptOutGA()) return;
+
+  const script = document.createElement("script");
+  script.src = "https://www.googletagmanager.com/gtag/js?id=G-BN1ZV55K0M";
+  script.async = true;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  gtag = () => {dataLayer.push(arguments);};
+  gtag('js', new Date());
+  gtag('config', 'G-BN1ZV55K0M', { 'anonymize_ip': true });
+}
+insertScriptForGA();
+
+function isOptOutGA(){
+  const url = new URL(location.href);
+  // 本番環境以外は除外
+  const isNotProduction = url.hostname !== "17number.github.io" || !url.pathname.startsWith("/enr-relics-merger/");
+  // 特定クエリパラメータ(ga_off)がある場合は除外
+  const ignoreGA = url.searchParams.has("ga_off");
+  return isNotProduction || ignoreGA;
+}
+
 /********************
   * 多言語辞書
   ********************/
