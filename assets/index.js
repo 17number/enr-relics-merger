@@ -32,8 +32,7 @@ function isOptOutGA(){
     url.hostname !== "17number.github.io" ||
     !url.pathname.startsWith("/enr-relics-merger")
   );
-  const ignoreGA = url.searchParams.has("ga_off");
-  return isNotProduction || ignoreGA;
+  return isNotProduction;
 }
 
 /********************
