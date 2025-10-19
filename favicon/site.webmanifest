@@ -1,6 +1,6 @@
 {
-  "name": "Nightreign Relic Image Merger",
-  "short_name": "Nightreign Relic Image Merger",
+  "name": "Nightreign Relic Image Combiner",
+  "short_name": "Nightreign Relic Image Combiner",
   "icons": [
     {
       "src": "/favicon/web-app-manifest-192x192.png",
