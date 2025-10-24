@@ -35,6 +35,17 @@ function isOptOutGA(){
   return isNotProduction;
 }
 
+// GoatCounter
+function insertScriptForGoatCounter() {
+  const script = document.createElement("script");
+  script.setAttribute("data-goatcounter", "https://r17n.goatcounter.com/count");
+  script.async = true;
+  script.src = "//gc.zgo.at/count.js";
+  document.head.appendChild(script);
+}
+insertScriptForGoatCounter();
+
+
 /********************
   * 多言語辞書
   ********************/
