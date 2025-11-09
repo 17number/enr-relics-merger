@@ -166,6 +166,17 @@ function showToast(message, type="info", duration=3000){
   }, duration);
 }
 
+function loadLatestScreenType() {
+  const pattern = localStorage.getItem("selectedPattern") || "ritual";
+  if (!["ritual", "status", "preset"].includes(pattern)) {
+    return;
+  }
+
+  document.querySelectorAll(`input[name="pattern"]`).forEach(radio => radio.checked = false);
+  document.querySelector(`input[name="pattern"][value="${pattern}"]`).checked = true;
+}
+loadLatestScreenType();
+
 /********************
   * メイン処理
   ********************/
@@ -191,6 +202,7 @@ let selectedPattern = "ritual";
 document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
   radio.addEventListener("change",e=>{
     selectedPattern=e.target.value;
+    localStorage.setItem("selectedPattern", selectedPattern);
     generateMergedImage();
   });
 });
