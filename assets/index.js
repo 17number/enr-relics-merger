@@ -339,15 +339,47 @@ copyBtn.onclick=async()=>{
   },"image/png");
 };
 
-function getCropBox(img) {
-  if(selectedPattern==="ritual"){
-    return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.325, h: img.height*0.8125 };
-  } else if (selectedPattern==="status") {
-    return { x: img.width*0.35, y: img.height*0.27, w: img.width*0.40, h: img.height*0.58 };
-  } else if (selectedPattern==="preset") {
-    return { x: img.width*0.41, y: img.height*0.14, w: img.width*0.4, h: img.height*0.725 };
+const TARGET_ASPECT_RATIO = 16 / 9;
+const ASPECT_TOLERANCE = 0.01;
+
+function getActiveAreaRect(img) {
+  const actualRatio = img.width / img.height;
+
+  if (Math.abs(actualRatio - TARGET_ASPECT_RATIO) <= ASPECT_TOLERANCE) {
+    return { x: 0, y: 0, w: img.width, h: img.height };
   }
-  return { x: 0, y: 0, w: 0, h: 0 };
+
+  if (actualRatio > TARGET_ASPECT_RATIO) {
+    const contentWidth = img.height * TARGET_ASPECT_RATIO;
+    const offsetX = (img.width - contentWidth) / 2;
+    return { x: offsetX, y: 0, w: contentWidth, h: img.height };
+  } else {
+    const contentHeight = img.width / TARGET_ASPECT_RATIO;
+    const offsetY = (img.height - contentHeight) / 2;
+    return { x: 0, y: offsetY, w: img.width, h: contentHeight };
+  }
+}
+
+const cropPercentages = {
+  ritual:  { x: 0.05, y: 0.1125, w: 0.325, h: 0.8125 },
+  status:  { x: 0.35, y: 0.27,   w: 0.40,  h: 0.58   },
+  preset:  { x: 0.41, y: 0.14,   w: 0.4,   h: 0.725  },
+};
+
+function getCropBox(img) {
+  const area = getActiveAreaRect(img);
+  const crop = cropPercentages[selectedPattern];
+  if (!crop) {
+    return { x: 0, y: 0, w: 0, h: 0 };
+  }
+
+  // Apply pattern-specific crop percentages within the detected 16:9 content area.
+  return {
+    x: area.x + area.w * crop.x,
+    y: area.y + area.h * crop.y,
+    w: area.w * crop.w,
+    h: area.h * crop.h,
+  };
 }
 
 function handleClickDownloadLink(e) {
