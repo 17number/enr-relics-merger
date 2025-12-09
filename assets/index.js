@@ -55,7 +55,7 @@ const i18n = {
     alertBothFramesFilledForPaste: "既に両方の枠が埋まっています。リセットしてやり直してください。",
     alertCopyError: "コピー失敗: ",
     alertCopySuccess: "画像をクリップボードにコピーしました",
-    alertGenerateSuccess: "結合画像を生成しました",
+    alertGenerateSuccess: "画像を生成しました",
     alertSelectTwoImages: "2枚目の画像を選択してください",
     copy: "コピー",
     desc: `遺物(1〜3枠)、深き夜の深層遺物(4〜6枠)の遺物効果画像を1枚にまとめます。結合したい 遺物儀式の画像/ステータス画面の画像/プリセット画面の画像 を2枚選択してください。ドラッグ＆ドロップ、画像データのペースト(Win: Ctrl+v, Mac: ⌘+v)も可能です。(<a href="#sample" style="padding: 0; margin: 0;">サンプル</a>)`,
@@ -98,7 +98,7 @@ const i18n = {
     alertBothFramesFilledForPaste: "Both frames are already filled. Please reset and try again.",
     alertCopyError: "Copy failed: ",
     alertCopySuccess: "Image copied to clipboard",
-    alertGenerateSuccess: "Combined image generated",
+    alertGenerateSuccess: "Image generated",
     alertSelectTwoImages: "Please select the second image",
     copy: "Copy",
     desc: `Combine relic effect images of relic(slots 1–3) and deep of night depth relic(slots 4–6) into one image. Please select two images from the relic rites screen or the status screen or the preset screen that you want to combine. Drag & drop and image data can also be pasted (Win: Ctrl+v, Mac: ⌘+v). (<a href="#sample" style="padding: 0; margin: 0;">Examples</a>)`,
@@ -210,6 +210,8 @@ document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
 addTextQrCheckbox.addEventListener("change", generateMergedImage);
 
 async function loadImage(file){
+  if (!file) return null;
+
   return new Promise((resolve,reject)=>{
     const reader=new FileReader();
     reader.onload=e=>{
@@ -298,7 +300,7 @@ function handleReset(){
   document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
   document.querySelectorAll("#reset1, #reset2").forEach(btn=>{ btn.style.display="none"; });
 };
-resetBtn.addEventListener("click",handleReset);
+resetBtn.addEventListener("click", handleReset);
 
 // 個別リセットボタン
 function handleResetIndividual(resetId, fileInputId, previewId){
@@ -310,6 +312,7 @@ function handleResetIndividual(resetId, fileInputId, previewId){
   document.querySelectorAll("#copy, #download").forEach(btn=>{ btn.style.display="none"; });
   document.querySelectorAll(".ios-copy-info").forEach(el=>el.remove());
   document.getElementById(resetId).style.display="none";
+  generateMergedImage();
 };
 [1,2].forEach(num=>{
   document.getElementById(`reset${num}`).addEventListener("click",()=>{
@@ -340,6 +343,8 @@ copyBtn.onclick=async()=>{
 };
 
 function getCropBox(img) {
+  if (!img) return { x: 0, y: 0, w: 0, h: 0 };
+
   if(selectedPattern==="ritual"){
     return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.325, h: img.height*0.8125 };
   } else if (selectedPattern==="status") {
@@ -390,7 +395,6 @@ downloadLink.addEventListener("click", handleClickDownloadLink);
 async function generateMergedImage() {
   const file1 = file1Input.files[0], file2 = file2Input.files[0];
   if(!file1&&!file2){ return; }
-  else if(!file1||!file2){ showToast(t("alertSelectTwoImages"),"info"); return; }
 
   // 一部要素を初期化
   document.querySelectorAll("#output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
@@ -404,22 +408,27 @@ async function generateMergedImage() {
   // Canvas サイズ（文字＋QRスペース分 高さを少し追加）
   const canvas = document.getElementById("canvas");
   canvas.width = crop1.w + crop2.w;
-  canvas.height = crop1.h;
-  const baseHeight = crop1.h;
-  const multiplier = Math.min(crop1.w, baseHeight) / Math.max(crop1.w, baseHeight);
+  canvas.height = crop1.h || crop2.h;
+  const baseWidth = crop1.w || crop2.w;
+  const baseHeight = crop1.h || crop2.h;
+  const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
   const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
   const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
-  if (addTextQrCheckbox.checked) {
+  if (addTextQrCheckbox.checked && img1 && img2) {
     canvas.height += Math.max(qrSize, fontSize) + 10;
   }
 
   const ctx = canvas.getContext("2d");
 
   // 元画像描画
-  ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
-  ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
+  if (img1) {
+    ctx.drawImage(img1, crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
+  }
+  if (img2) {
+    ctx.drawImage(img2, crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
+  }
 
-  if (addTextQrCheckbox.checked) {
+  if (addTextQrCheckbox.checked && img1 && img2) {
     // 文字描画
     const text1 = t("generatedBy");
     const text2 = `https://17number.github.io/enr-relics-merger/`;
