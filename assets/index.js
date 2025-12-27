@@ -198,7 +198,7 @@ const outputDiv = document.getElementById("output");
 const outputImg = document.getElementById("output-img");
 
 // 画面タイプ選択
-let selectedPattern = "ritual";
+let selectedPattern = localStorage.getItem("selectedPattern") || "ritual";
 document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
   radio.addEventListener("change",e=>{
     selectedPattern=e.target.value;
