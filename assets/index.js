@@ -346,11 +346,11 @@ function getCropBox(img) {
   if (!img) return { x: 0, y: 0, w: 0, h: 0 };
 
   if(selectedPattern==="ritual"){
-    return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.325, h: img.height*0.8125 };
+    return { x: img.width*0.05, y: img.height*0.1125, w: img.width*0.36, h: img.height*0.814 };
   } else if (selectedPattern==="status") {
-    return { x: img.width*0.35, y: img.height*0.27, w: img.width*0.40, h: img.height*0.58 };
+    return { x: img.width*0.35, y: img.height*0.27, w: img.width*0.4375, h: img.height*0.6175 };
   } else if (selectedPattern==="preset") {
-    return { x: img.width*0.41, y: img.height*0.14, w: img.width*0.4, h: img.height*0.725 };
+    return { x: img.width*0.41, y: img.height*0.14, w: img.width*0.425, h: img.height*0.65 };
   }
   return { x: 0, y: 0, w: 0, h: 0 };
 }
