@@ -493,12 +493,20 @@ async function generateMergedImage() {
     copyBtn.parentElement.insertAdjacentElement("beforeend", infoText);
   }
 
-  gtag('event', 'merge_image', {
-    event_category: 'ui_action',
-    event_label: 'Merge Image',
-    pattern: selectedPattern,
-    qr: addTextQrCheckbox.checked ? 'on' : 'off',
-  });
+  if (img1 && img2) {
+    gtag('event', 'merge_image', {
+      event_category: 'ui_action',
+      event_label: 'Merge Image',
+      pattern: selectedPattern,
+      qr: addTextQrCheckbox.checked ? 'on' : 'off',
+    });
+  } else {
+    gtag('event', 'crop_image', {
+      event_category: 'ui_action',
+      event_label: 'Crop Image',
+      pattern: selectedPattern,
+    });
+  }
 }
 
 // ドラッグ＆ドロップ
