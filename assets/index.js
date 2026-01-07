@@ -168,7 +168,7 @@ function showToast(message, type="info", duration=3000){
 
 function loadLatestScreenType() {
   const pattern = localStorage.getItem("selectedPattern") || "ritual";
-  if (!["ritual", "status", "preset"].includes(pattern)) {
+  if (!["ritual", "status", "preset", "original"].includes(pattern)) {
     return;
   }
 
@@ -352,7 +352,7 @@ function getCropBox(img) {
   } else if (selectedPattern==="preset") {
     return { x: img.width*0.41, y: img.height*0.14, w: img.width*0.425, h: img.height*0.65 };
   }
-  return { x: 0, y: 0, w: 0, h: 0 };
+  return { x: 0, y: 0, w: img.width, h: img.height };
 }
 
 function handleClickDownloadLink(e) {
@@ -612,7 +612,7 @@ const overlay=document.getElementById("overlay");
 overlay.addEventListener("click",()=>overlay.classList.remove("active"));
 
 // バージョン情報取得・表示
-fetch("https://17number.github.io/enr-relics-merger/version.json")
+fetch("/version.json")
   .then(res => res.json())
   .then(v => {
     const hash = v.hash;

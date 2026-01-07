@@ -1,10 +1,10 @@
 (async () => {
   try {
-    const res = await fetch('./version.json', { cache: 'no-store' });
+    const res = await fetch('/version.json', { cache: 'no-store' });
     const { hash } = await res.json();
 
     const script = document.createElement('script');
-    script.src = `assets/index.js?v=${hash}`;
+    script.src = `/assets/index.js?v=${hash}`;
     script.defer = true;
     document.body.appendChild(script);
   } catch (e) {
