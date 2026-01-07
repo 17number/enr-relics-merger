@@ -612,7 +612,10 @@ const overlay=document.getElementById("overlay");
 overlay.addEventListener("click",()=>overlay.classList.remove("active"));
 
 // バージョン情報取得・表示
-fetch("/version.json")
+const loaderUrl = new URL(document.currentScript.src);
+const base = loaderUrl.pathname.replace(/\/assets\/index\.js$/, "");
+const versionUrl = `${base}/version.json`;
+fetch(versionUrl)
   .then(res => res.json())
   .then(v => {
     const hash = v.hash;
