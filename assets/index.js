@@ -480,6 +480,9 @@ async function generateMergedImage() {
     }
 
     ctx = canvas.getContext("2d");
+    // 背景を黒埋め
+    ctx.fillStyle = "#000000";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // 元画像描画
     imgs.forEach((img, index) => {
