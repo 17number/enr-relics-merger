@@ -91,20 +91,50 @@
 
   <h2>結合画像設定</h2>
 
-  <div class="drop-zone" id="drop-zone">ここに画像をドラッグ＆ドロップできます (2枚)</div>
+  <div class="drop-zone" id="drop-zone">
+    ここに画像をドラッグ＆ドロップできます (2枚)
+  </div>
 
   <div class="input-area">
     <div class="file-block" id="file-block1">
-      <h3>遺物1〜3</h3>
+      <h3 id="relic1">遺物1〜3</h3>
       <input type="file" id="file1" accept="image/*">
       <img id="preview1" class="preview" alt="プレビュー1" style="display:none;">
       <button id="reset1" style="display: none;">リセット</button>
     </div>
     <div class="file-block" id="file-block2">
-      <h3>遺物4〜6</h3>
+      <h3 id="relic2">遺物4〜6</h3>
       <input type="file" id="file2" accept="image/*">
       <img id="preview2" class="preview" alt="プレビュー2" style="display:none;">
       <button id="reset2" style="display: none;">リセット</button>
+    </div>
+  </div>
+  <div class="input-area" id="history-inputs1" style="display:none;">
+    <div class="file-block" id="file-block3">
+      <h3 id="relic3">遺物3</h3>
+      <input type="file" id="file3" accept="image/*">
+      <img id="preview3" class="preview" alt="プレビュー3" style="display:none;">
+      <button id="reset3" style="display: none;">リセット</button>
+    </div>
+    <div class="file-block" id="file-block4">
+      <h3 id="relic4">遺物4</h3>
+      <input type="file" id="file4" accept="image/*">
+      <img id="preview4" class="preview" alt="プレビュー4" style="display:none;">
+      <button id="reset4" style="display: none;">リセット</button>
+    </div>
+  </div>
+  <div class="input-area" id="history-inputs2" style="display:none;">
+    <div class="file-block" id="file-block5">
+      <h3 id="relic5">遺物5</h3>
+      <input type="file" id="file5" accept="image/*">
+      <img id="preview5" class="preview" alt="プレビュー5" style="display:none;">
+      <button id="reset5" style="display: none;">リセット</button>
+    </div>
+    <div class="file-block" id="file-block6">
+      <h3 id="relic6">遺物6</h3>
+      <input type="file" id="file6" accept="image/*">
+      <img id="preview6" class="preview" alt="プレビュー6" style="display:none;">
+      <button id="reset6" style="display: none;">リセット</button>
     </div>
   </div>
 
@@ -115,7 +145,8 @@
       <input type="radio" name="pattern" id="pattern-ritual" value="ritual"><label for="pattern-ritual">遺物儀式画面</label><br>
       <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status">ステータス画面</label><br>
       <input type="radio" name="pattern" id="pattern-preset" value="preset"><label for="pattern-preset">プリセット画面</label><br>
-      <input type="radio" name="pattern" id="pattern-original" value="original"><label for="pattern-original">そのまま結合</label>
+      <input type="radio" name="pattern" id="pattern-original" value="original"><label for="pattern-original">そのまま結合</label><br>
+      <input type="radio" name="pattern" id="pattern-history" value="history"><label for="pattern-history">戦果履歴画面</label>
     </fieldset>
   </div>
 

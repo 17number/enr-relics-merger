@@ -77,20 +77,50 @@
 
   <h2>Settings</h2>
 
-  <div class="drop-zone" id="drop-zone">Drag & drop images here (2 images)</div>
+  <div class="drop-zone" id="drop-zone">
+    Drag & drop images here (2 images)
+  </div>
 
   <div class="input-area">
     <div class="file-block" id="file-block1">
-      <h3>Relics 1–3</h3>
+      <h3 id="relic1">Relics 1–3</h3>
       <input type="file" id="file1" accept="image/*">
       <img id="preview1" class="preview" alt="Preview 1" style="display:none;">
       <button id="reset1" style="display: none;">Reset</button>
     </div>
     <div class="file-block" id="file-block2">
-      <h3>Relics 4–6</h3>
+      <h3 id="relic2">Relics 4–6</h3>
       <input type="file" id="file2" accept="image/*">
       <img id="preview2" class="preview" alt="Preview 2" style="display:none;">
       <button id="reset2" style="display: none;">Reset</button>
+    </div>
+  </div>
+  <div class="input-area" id="history-inputs1" style="display:none;">
+    <div class="file-block" id="file-block3">
+      <h3 id="relic3">Relic 3</h3>
+      <input type="file" id="file3" accept="image/*">
+      <img id="preview3" class="preview" alt="Preview 3" style="display:none;">
+      <button id="reset3" style="display: none;">Reset</button>
+    </div>
+    <div class="file-block" id="file-block4">
+      <h3 id="relic4">Relic 4</h3>
+      <input type="file" id="file4" accept="image/*">
+      <img id="preview4" class="preview" alt="Preview 4" style="display:none;">
+      <button id="reset4" style="display: none;">Reset</button>
+    </div>
+  </div>
+  <div class="input-area" id="history-inputs2" style="display:none;">
+    <div class="file-block" id="file-block5">
+      <h3 id="relic5">Relic 5</h3>
+      <input type="file" id="file5" accept="image/*">
+      <img id="preview5" class="preview" alt="Preview 5" style="display:none;">
+      <button id="reset5" style="display: none;">Reset</button>
+    </div>
+    <div class="file-block" id="file-block6">
+      <h3 id="relic6">Relic 6</h3>
+      <input type="file" id="file6" accept="image/*">
+      <img id="preview6" class="preview" alt="Preview 6" style="display:none;">
+      <button id="reset6" style="display: none;">Reset</button>
     </div>
   </div>
 
@@ -101,7 +131,8 @@
       <input type="radio" name="pattern" id="pattern-ritual" value="ritual" checked><label for="pattern-ritual">Relic Rites Screen</label><br>
       <input type="radio" name="pattern" id="pattern-status" value="status"><label for="pattern-status">Status Screen</label><br>
       <input type="radio" name="pattern" id="pattern-preset" value="preset"><label for="pattern-preset">Preset Screen</label><br>
-      <input type="radio" name="pattern" id="pattern-original" value="original"><label for="pattern-original">Original</label>
+      <input type="radio" name="pattern" id="pattern-original" value="original"><label for="pattern-original">Original</label><br>
+      <input type="radio" name="pattern" id="pattern-history" value="history"><label for="pattern-history">History Screen</label>
     </fieldset>
   </div>
 

@@ -9,8 +9,8 @@ h1 { font-size: 1.4rem; }
 .drop-zone.dragover { border-color: #3399ff; background: #3399ff33; }
 button, a { font-family: "Segoe UI", sans-serif; margin: 10px 5px 20px 0; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer; }
 #swap { background:#3399ff; color:#fff; }
-#reset, #reset1, #reset2 { background:#dc3545; color:#fff; }
-#reset1, #reset2 { padding: 5px 10px; font-size: 0.85rem; margin-bottom: 0; }
+#reset, .input-area [id*="reset"] { background:#dc3545; color:#fff; }
+.input-area [id*="reset"] { padding: 5px 10px; font-size: 0.85rem; margin-bottom: 0; }
 #add-text-qr, label[for="add-text-qr"] { cursor: pointer; }
 #result-buttons {
   display: flex;
