@@ -285,6 +285,17 @@ fileInputs.forEach((fileInput, i) => {
   * ペースト
   */
 document.addEventListener('paste', (e) => {
+  const active = document.activeElement;
+  if (active?.tagName === 'INPUT' || active?.tagName === 'TEXTAREA' || active?.isContentEditable) {
+    return;
+  }
+
+  const items = Array.from(e.clipboardData?.items || []);
+  const imageItems = items.filter(item => item.type.startsWith('image/'));
+  if (!imageItems.length) {
+    return;
+  }
+
   const files = fileInputs.map(input => input.files[0]);
   const isHistoryPattern = selectedPattern === 'history';
   if (!isHistoryPattern && files[0] && files[1]) {
@@ -295,20 +306,17 @@ document.addEventListener('paste', (e) => {
     return;
   }
 
-  const items = e.clipboardData.items;
-  for (const item of items) {
-    if (item.type.startsWith('image/')) {
-      const file = item.getAsFile();
-      const emptyIndex = files.findIndex(f => !f);
-      if (emptyIndex === -1) {
-        break;
-      }
-
-      const dt = new DataTransfer();
-      dt.items.add(file);
-      fileInputs[emptyIndex].files = dt.files;
-      setPreview(fileInputs[emptyIndex].files[0], previews[emptyIndex], resets[emptyIndex]);
+  for (const item of imageItems) {
+    const file = item.getAsFile();
+    const emptyIndex = files.findIndex(f => !f);
+    if (emptyIndex === -1) {
+      break;
     }
+
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    fileInputs[emptyIndex].files = dt.files;
+    setPreview(fileInputs[emptyIndex].files[0], previews[emptyIndex], resets[emptyIndex]);
   }
 
   generateMergedImage();
