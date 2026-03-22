@@ -426,6 +426,9 @@ const cropPercentages = {
 
 function getCropBox(img) {
   if (!img) return { x: 0, y: 0, w: 0, h: 0 };
+  if (selectedPattern === 'original') {
+    return { x: 0, y: 0, w: img.width, h: img.height };
+  }
 
   const area = getActiveAreaRect(img);
   const crop = cropPercentages[selectedPattern];
