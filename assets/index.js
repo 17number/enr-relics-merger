@@ -196,6 +196,7 @@ const addTextQrCheckbox = document.getElementById("add-text-qr");
 const copyBtn = document.getElementById("copy");
 const downloadLink = document.getElementById("download");
 const downloadNameInput = document.getElementById("download_name");
+const imageTitleInput = document.getElementById('image_title');
 const outputDiv = document.getElementById("output");
 const outputImg = document.getElementById("output-img");
 const dropZone = document.getElementById("drop-zone");
@@ -230,6 +231,7 @@ document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
 });
 
 addTextQrCheckbox.addEventListener("change", generateMergedImage);
+imageTitleInput.addEventListener("change", generateMergedImage);
 
 async function loadImage(file){
   if (!file) return null;
@@ -423,6 +425,31 @@ function handleClickDownloadLink(e) {
 }
 downloadLink.addEventListener("click", handleClickDownloadLink);
 
+function calcSizes(crops) {
+  if (selectedPattern === "history") {
+    const crop1 = crops[0];
+    const baseWidth = crop1.w * 2;
+    const baseHeight = crop1.h * 3;
+    const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
+    const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
+    const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
+
+    return {fontSize, qrSize, baseWidth, baseHeight, multiplier};
+  }
+
+  const crop1 = crops[0];
+  const crop2 = crops[1];
+  canvas.width = crop1.w + crop2.w;
+  canvas.height = crop1.h || crop2.h;
+  const baseWidth = crop1.w || crop2.w;
+  const baseHeight = crop1.h || crop2.h;
+  const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
+  const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
+  const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
+
+  return {fontSize, qrSize, baseWidth, baseHeight, multiplier};
+}
+
 async function generateMergedImage() {
   const files = fileInputs.map(input => input.files[0]);
   if(files.every(f => !f)){ return; }
@@ -438,24 +465,25 @@ async function generateMergedImage() {
   const imgs = await Promise.all(files.map(file => loadImage(file)));
   const crops = imgs.map(img => getCropBox(img));
 
-  // Canvas サイズ（文字＋QRスペース分 高さを少し追加）
   const canvas = document.getElementById("canvas");
+  const {fontSize, qrSize, baseWidth, baseHeight, multiplier} = calcSizes(crops);
+
+  // Canvas サイズ調整（サイズ調整（ヘッダー分, 文字＋QRスペース分 高さを少し追加）
   let isDrawQrCode = addTextQrCheckbox.checked;
-  let ctx, fontSize, qrSize;
+  const imageTitle = imageTitleInput.value.trim();
+  const hasHeader = imageTitle.length > 0;
+  const HEADER_HEIGHT = hasHeader ? Math.max(12, fontSize) * 1.75 : 0;
+  let ctx;
   if (selectedPattern !== "history") {
     const crop1 = crops[0];
     const crop2 = crops[1];
     canvas.width = crop1.w + crop2.w;
     canvas.height = crop1.h || crop2.h;
-    const baseWidth = crop1.w || crop2.w;
-    const baseHeight = crop1.h || crop2.h;
+
+    canvas.height += HEADER_HEIGHT;
+
     isDrawQrCode = isDrawQrCode && imgs[0] && imgs[1];
-    const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
-    fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
-    qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
-    if (isDrawQrCode) {
-      canvas.height += Math.max(qrSize, fontSize) + 10;
-    }
+    canvas.height += isDrawQrCode ? Math.max(qrSize, fontSize) + 10 : 0;
 
     ctx = canvas.getContext("2d");
     // 背景を黒埋め
@@ -464,23 +492,19 @@ async function generateMergedImage() {
 
     // 元画像描画
     if (imgs[0]) {
-      ctx.drawImage(imgs[0], crop1.x, crop1.y, crop1.w, crop1.h, 0, 0, crop1.w, crop1.h);
+      ctx.drawImage(imgs[0], crop1.x, crop1.y, crop1.w, crop1.h, 0, HEADER_HEIGHT, crop1.w, crop1.h);
     }
     if (imgs[1]) {
-      ctx.drawImage(imgs[1], crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, 0, crop2.w, crop2.h);
+      ctx.drawImage(imgs[1], crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, HEADER_HEIGHT, crop2.w, crop2.h);
     }
   } else {
     const crop1 = crops[0];
     canvas.width = crop1.w * 2;
     canvas.height = crop1.h * 3;
-    const baseWidth = canvas.width;
-    const baseHeight = canvas.height;
-    const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
-    fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
-    qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
-    if (isDrawQrCode) {
-      canvas.height += Math.max(qrSize, fontSize) + 10;
-    }
+
+    canvas.height += HEADER_HEIGHT;
+
+    canvas.height += isDrawQrCode ? Math.max(qrSize, fontSize) + 10 : 0;
 
     ctx = canvas.getContext("2d");
     // 背景を黒埋め
@@ -492,8 +516,21 @@ async function generateMergedImage() {
       const crop = crops[index];
       const x = index < 3 ? 0 : crop.w;
       const y = (index % 3) * crop.h;
-      ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, x, y, crop.w, crop.h);
+      ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, x, y + HEADER_HEIGHT, crop.w, crop.h);
     });
+  }
+
+  if (hasHeader) {
+    // 文字描画
+    ctx.font = `${fontSize}px sans-serif`;
+    ctx.fillStyle = "#f00";
+    ctx.strokeStyle = "#fff";
+    ctx.lineWidth = fontSize / 5;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.textAlign = "left";
+    ctx.strokeText(imageTitle, fontSize * 0.5, HEADER_HEIGHT * 0.7);
+    ctx.fillText(imageTitle, fontSize * 0.5, HEADER_HEIGHT * 0.7);
   }
 
   if (isDrawQrCode) {
@@ -502,11 +539,9 @@ async function generateMergedImage() {
     const text2 = `https://17number.github.io/enr-relics-merger/`;
     ctx.font = `${fontSize}px sans-serif`;
     ctx.fillStyle = "white";
-    ctx.strokeStyle = "lightskyblue";
+    ctx.lineWidth = 0;
     ctx.textAlign = "left";
-    ctx.strokeText(text1, fontSize * 0.5, canvas.height - (fontSize * 2.0));
     ctx.fillText(text1, fontSize * 0.5, canvas.height - (fontSize * 2.0));
-    ctx.strokeText(text2, fontSize * 0.5, canvas.height - (fontSize * 0.5));
     ctx.fillText(text2, fontSize * 0.5, canvas.height - (fontSize * 0.5));
 
     // QRコード生成
