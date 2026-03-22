@@ -183,6 +183,16 @@ function loadLatestScreenType() {
 }
 loadLatestScreenType();
 
+function loadLatestTrimmingCheck() {
+  const trimming = localStorage.getItem("trimming") || false;
+  if (!trimming) {
+    return;
+  }
+
+  document.getElementById("trimming").checked = true;
+}
+loadLatestTrimmingCheck();
+
 /********************
   * メイン処理
   ********************/
@@ -193,6 +203,7 @@ const resets = Array.from(document.querySelectorAll(".file-block [id*='reset']")
 const swapBtn = document.getElementById("swap");
 const resetBtn = document.getElementById("reset");
 const addTextQrCheckbox = document.getElementById("add-text-qr");
+const trimmingCheckbox = document.getElementById("trimming");
 const copyBtn = document.getElementById("copy");
 const downloadLink = document.getElementById("download");
 const downloadNameInput = document.getElementById("download_name");
@@ -232,6 +243,14 @@ document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
 
 addTextQrCheckbox.addEventListener("change", generateMergedImage);
 imageTitleInput.addEventListener("change", generateMergedImage);
+trimmingCheckbox.addEventListener("change", (event) => {
+  if (!event.target.checked) {
+    localStorage.removeItem("trimming");
+  } else {
+    localStorage.setItem("trimming", 1);
+  }
+  generateMergedImage();
+});
 
 async function loadImage(file){
   if (!file) return null;
@@ -377,6 +396,10 @@ const TARGET_ASPECT_RATIO = 16 / 9;
 const ASPECT_TOLERANCE = 0.01;
 
 function getActiveAreaRect(img) {
+  if (!trimmingCheckbox.checked) {
+    return { x: 0, y: 0, w: img.width, h: img.height };
+  }
+
   const actualRatio = img.width / img.height;
 
   if (Math.abs(actualRatio - TARGET_ASPECT_RATIO) <= ASPECT_TOLERANCE) {
