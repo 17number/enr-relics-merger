@@ -38,6 +38,34 @@ button, a { font-family: "Segoe UI", sans-serif; margin: 10px 5px 20px 0; paddin
     flex: 0 0 85vw;
   }
 }
+#shareToXBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  border: none;
+
+  background-color: #000;
+  color: #fff;
+
+  cursor: pointer;
+  transition: background-color 0.2s, opacity 0.2s;
+}
+
+#shareToXBtn:hover {
+  background-color: #222;
+}
+
+#shareToXBtn:active {
+  opacity: 0.8;
+}
+
+#shareToXBtn img {
+  width: 24px;
+  height: 24px;
+  display: block;
+  background-color: #fff;
+}
 #download { background:#28a745; color:#fff; display:none; text-decoration:none; }
 #copy { background:#17a2b8; color:#fff; display:none; }
 #canvas { display:none; }
