@@ -518,17 +518,13 @@ function calcSizes(crops) {
 
 async function generateMergedImage() {
   const files = fileInputs.map(input => input.files[0]);
-  if(files.every(f => !f)){ return; }
-  else if (selectedPattern === "history" && files.some(f => !f)) {
-    outputDiv.style.display="none";
-    return;
-  }
+  if (files.every(f => !f)) return;
 
   // 一部要素を初期化
   document.querySelectorAll("#output-img").forEach(img=>{ img.src=""; img.style.display="none"; });
   document.getElementById("canvas").getContext("2d").clearRect(0,0,document.getElementById("canvas").width,document.getElementById("canvas").height);
 
-  const imgs = await Promise.all(files.map(file => loadImage(file)));
+  const imgs = (await Promise.all(files.map(file => loadImage(file)))).filter(img => img);
   const crops = imgs.map(img => getCropBox(img));
 
   const canvas = document.getElementById("canvas");
@@ -565,11 +561,12 @@ async function generateMergedImage() {
     }
   } else {
     const crop1 = crops[0];
-    canvas.width = crop1.w * 2;
-    canvas.height = crop1.h * 3;
+    canvas.width = crop1.w * (imgs.length > 3 ? 2 : 1);
+    canvas.height = crop1.h * (imgs.length >= 3 ? 3 : imgs.length);
 
     canvas.height += HEADER_HEIGHT;
 
+    isDrawQrCode = isDrawQrCode && imgs.length === 6 && imgs.every(img => img);
     canvas.height += isDrawQrCode ? Math.max(qrSize, fontSize) + 10 : 0;
 
     ctx = canvas.getContext("2d");
@@ -580,8 +577,8 @@ async function generateMergedImage() {
     // 元画像描画
     imgs.forEach((img, index) => {
       const crop = crops[index];
-      const x = index < 3 ? 0 : crop.w;
-      const y = (index % 3) * crop.h;
+      const x = index < 3 ? 0 : crop1.w;
+      const y = (index % 3) * crop1.h;
       ctx.drawImage(img, crop.x, crop.y, crop.w, crop.h, x, y + HEADER_HEIGHT, crop.w, crop.h);
     });
   }
