@@ -69,6 +69,9 @@ const i18n = {
     longTap: "画像の コピー/保存/etc をしたい場合は以下画像をロングタップしてください。",
     longTapOrRightClick: "画像の コピー/保存/etc をしたい場合は以下画像をロングタップ(または右クリック)してください。",
     mergeSettings: "結合画像設定",
+    mergeDirection: "結合方向",
+    mergeHorizontal: "横",
+    mergeVertical: "縦",
     note1: "画像はそれぞれ1〜3枠、4〜6枠の遺物効果が写っている必要があります。",
     note2: "座標指定で切り抜いているため画像サイズなどの要因で正常に結合できない場合があります。",
     note3: "選択できる画像は2枚までです。ドラッグ＆ドロップで2枚以上選択した場合は先頭の2枚が使用されます。",
@@ -115,6 +118,9 @@ const i18n = {
     longTap: "Long-press the image to copy/save/etc.",
     longTapOrRightClick: "Long-press or right-click the image to copy/save/etc.",
     mergeSettings: "Settings",
+    mergeDirection: "Merge Direction",
+    mergeHorizontal: "Horizontal",
+    mergeVertical: "Vertical",
     note1: "Each image must show the relic effects for slots 1–3 and 4–6.",
     note2: "Due to the cropping method used, images may not combine correctly depending on their size and other factors.",
     note3: "You can select up to 2 images. If you select more than 2 images via drag & drop, only the first 2 will be used.",
@@ -214,17 +220,25 @@ const dropZone = document.getElementById("drop-zone");
 
 // 画面タイプ選択
 let selectedPattern = localStorage.getItem("selectedPattern") || "ritual";
+let mergeDirection = localStorage.getItem("mergeDirection") || "horizontal";
+if (!["horizontal", "vertical"].includes(mergeDirection)) {
+  mergeDirection = "horizontal";
+}
+
+const directionBlock = document.getElementById("merge-direction-block");
 const toggleHistoryInputs = () => {
   const styleDisplay = selectedPattern === "history" ? "flex" : "none";
   document.querySelectorAll("[id*='history-inputs']").forEach((block, index) => {
     block.style.display = styleDisplay;
   });
   if (selectedPattern === "history") {
+    directionBlock.style.display = "none";
     document.getElementById('relic1').textContent = t('relic1');
     document.getElementById('relic2').textContent = t('relic2');
     dropZone.textContent = t('dropHere6');
     swapBtn.style.display = "none";
   } else {
+    directionBlock.style.display = "block";
     document.getElementById('relic1').textContent = t('relic1_3');
     document.getElementById('relic2').textContent = t('relic4_6');
     dropZone.textContent = t('dropHere');
@@ -232,6 +246,15 @@ const toggleHistoryInputs = () => {
   }
 };
 toggleHistoryInputs();
+document.querySelectorAll('input[name="merge-direction"]').forEach(radio => {
+  radio.checked = radio.value === mergeDirection;
+  radio.addEventListener("change", e => {
+    mergeDirection = e.target.value;
+    localStorage.setItem("mergeDirection", mergeDirection);
+    generateMergedImage();
+  });
+});
+
 document.querySelectorAll('input[name="pattern"]').forEach(radio=>{
   radio.addEventListener("change",e=>{
     selectedPattern=e.target.value;
@@ -426,26 +449,31 @@ function getActiveAreaRect(img) {
   }
 }
 
-const cropPercentages = {
-  ritual: { x: 0.05, y: 0.1125, w: 0.36, h: 0.814 },
-  status: { x: 0.35, y: 0.27, w: 0.4375, h: 0.6178 },
-  preset: { x: 0.41, y: 0.14, w: 0.425, h: 0.65 },
-  history: { x: 0.303, y: 0.17, w: 0.385, h: 0.33 },
-};
-
-function getCropBox(img) {
+function getCropBox(img, index) {
   if (!img) return { x: 0, y: 0, w: 0, h: 0 };
   if (selectedPattern === 'original') {
     return { x: 0, y: 0, w: img.width, h: img.height };
   }
 
   const area = getActiveAreaRect(img);
-  const crop = cropPercentages[selectedPattern];
+
+  const cropPercentages = {
+    ritual: { x: 0.05, y: 0.1125, w: 0.36, h: 0.814 },
+    ritual1: { x: 0.05, y: 0.1125 + 0.2715, w: 0.36, h: 0.814 - 0.2715 },
+    status: { x: 0.35, y: 0.27, w: 0.4375, h: 0.6178 },
+    preset: { x: 0.41, y: 0.14, w: 0.425, h: 0.65 },
+    history: { x: 0.303, y: 0.17, w: 0.385, h: 0.33 },
+  };
+  let crop = cropPercentages[selectedPattern];
   if (!crop) {
     return { x: 0, y: 0, w: 0, h: 0 };
   }
 
   // Apply pattern-specific crop percentages within the detected 16:9 content area.
+  if (selectedPattern === 'ritual' && index === 1 && mergeDirection === 'vertical') {
+    crop = cropPercentages['ritual1'];
+  }
+
   return {
     x: area.x + area.w * crop.x,
     y: area.y + area.h * crop.y,
@@ -491,29 +519,39 @@ function handleClickDownloadLink(e) {
 }
 downloadLink.addEventListener("click", handleClickDownloadLink);
 
-function calcSizes(crops) {
-  if (selectedPattern === "history") {
-    const crop1 = crops[0];
-    const baseWidth = crop1.w * 2;
-    const baseHeight = crop1.h * 3;
-    const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
-    const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
-    const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
-
-    return {fontSize, qrSize, baseWidth, baseHeight, multiplier};
-  }
-
-  const crop1 = crops[0];
-  const crop2 = crops[1];
-  canvas.width = crop1.w + crop2.w;
-  canvas.height = crop1.h || crop2.h;
-  const baseWidth = crop1.w || crop2.w;
-  const baseHeight = crop1.h || crop2.h;
+function calcSizes(crops, layoutWidth, layoutHeight) {
+  const baseWidth = layoutWidth;
+  const baseHeight = layoutHeight;
   const multiplier = Math.min(baseWidth, baseHeight) / Math.max(baseWidth, baseHeight);
-  const fontSize = Math.max(12, baseHeight * multiplier * 0.04);  // 最小12px
-  const qrSize = Math.max(40, baseHeight * multiplier * 0.12);   // 最小40px
+
+  // 結合後のCanvasサイズを基準に、タイトル・QRがCanvasからはみ出さない
+  // ようにサイズを動的に決定する。
+  const fontSize = Math.max(12, baseHeight * multiplier * 0.04);
+  const qrSize = Math.max(40, baseHeight * multiplier * 0.12);
 
   return {fontSize, qrSize, baseWidth, baseHeight, multiplier};
+}
+
+function fitTitleFontSize(ctx, text, initialSize, maxWidth) {
+  if (!text) return initialSize;
+  let size = initialSize;
+  while (size > 8) {
+    ctx.font = `${size}px sans-serif`;
+    if (ctx.measureText(text).width <= maxWidth) break;
+    size -= 1;
+  }
+  return size;
+}
+
+function fitFooterFontSize(ctx, texts, initialSize, maxWidth) {
+  if (!texts.length) return initialSize;
+  let size = initialSize;
+  while (size > 6) {
+    ctx.font = `${size}px sans-serif`;
+    if (texts.every(text => ctx.measureText(text).width <= maxWidth)) break;
+    size -= 1;
+  }
+  return size;
 }
 
 async function generateMergedImage() {
@@ -525,56 +563,86 @@ async function generateMergedImage() {
   document.getElementById("canvas").getContext("2d").clearRect(0,0,document.getElementById("canvas").width,document.getElementById("canvas").height);
 
   const imgs = (await Promise.all(files.map(file => loadImage(file)))).filter(img => img);
-  const crops = imgs.map(img => getCropBox(img));
+  const crops = imgs.map((img, i) => getCropBox(img, i));
 
   const canvas = document.getElementById("canvas");
-  const {fontSize, qrSize, baseWidth, baseHeight, multiplier} = calcSizes(crops);
 
-  // Canvas サイズ調整（サイズ調整（ヘッダー分, 文字＋QRスペース分 高さを少し追加）
-  let isDrawQrCode = addTextQrCheckbox.checked;
-  const imageTitle = imageTitleInput.value.trim();
-  const hasHeader = imageTitle.length > 0;
-  const HEADER_HEIGHT = hasHeader ? Math.max(12, fontSize) * 1.75 : 0;
-  let ctx;
+  let layoutWidth;
+  let layoutHeight;
   if (selectedPattern !== "history") {
     const crop1 = crops[0];
     const crop2 = crops[1];
-    canvas.width = crop1.w + crop2.w;
-    canvas.height = crop1.h || crop2.h;
+    if (mergeDirection === "vertical") {
+      layoutWidth = Math.max(crop1.w, crop2.w);
+      layoutHeight = crop1.h + crop2.h;
+    } else {
+      layoutWidth = crop1.w + crop2.w;
+      layoutHeight = Math.max(crop1.h, crop2.h);
+    }
+  } else {
+    const crop1 = crops[0];
+    layoutWidth = crop1.w * (imgs.length > 3 ? 2 : 1);
+    layoutHeight = crop1.h * (imgs.length >= 3 ? 3 : imgs.length);
+  }
 
-    canvas.height += HEADER_HEIGHT;
+  const {fontSize: initialFontSize, qrSize: initialQrSize} = calcSizes(crops, layoutWidth, layoutHeight);
+  let isDrawQrCode = addTextQrCheckbox.checked;
+  const imageTitle = imageTitleInput.value.trim();
+  const hasHeader = imageTitle.length > 0;
+
+  // タイトルは最終Canvasの横幅にも収まるように縮小する。
+  const titleCtx = canvas.getContext("2d");
+  const titleMaxWidth = Math.max(1, layoutWidth - initialFontSize);
+  const fontSize = fitTitleFontSize(titleCtx, imageTitle, initialFontSize, titleMaxWidth);
+  const qrSize = Math.min(initialQrSize, Math.max(1, layoutWidth - 20));
+
+  // フッター文字列は、QRコードの左側に確保できる幅に収まるように
+  // 縦結合時を含めて文字サイズを動的に調整する。
+  const footerTexts = [t("generatedBy"), `https://17number.github.io/enr-relics-merger/`];
+  const footerMaxWidth = Math.max(1, layoutWidth - qrSize - 30);
+  const footerFontSize = fitFooterFontSize(titleCtx, footerTexts, initialFontSize, footerMaxWidth);
+  const HEADER_HEIGHT = hasHeader ? Math.max(12, fontSize) * 1.75 : 0;
+  let ctx;
+
+  if (selectedPattern !== "history") {
+    const crop1 = crops[0];
+    const crop2 = crops[1];
+    canvas.width = layoutWidth;
+    canvas.height = layoutHeight + HEADER_HEIGHT;
 
     isDrawQrCode = isDrawQrCode && imgs[0] && imgs[1];
     canvas.height += isDrawQrCode ? Math.max(qrSize, fontSize) + 10 : 0;
 
     ctx = canvas.getContext("2d");
-    // 背景を黒埋め
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 元画像描画
     if (imgs[0]) {
-      ctx.drawImage(imgs[0], crop1.x, crop1.y, crop1.w, crop1.h, 0, HEADER_HEIGHT, crop1.w, crop1.h);
+      ctx.drawImage(
+        imgs[0], crop1.x, crop1.y, crop1.w, crop1.h,
+        0, HEADER_HEIGHT, crop1.w, crop1.h
+      );
     }
     if (imgs[1]) {
-      ctx.drawImage(imgs[1], crop2.x, crop2.y, crop2.w, crop2.h, crop1.w, HEADER_HEIGHT, crop2.w, crop2.h);
+      const x = mergeDirection === "vertical" ? 0 : crop1.w;
+      const y = mergeDirection === "vertical" ? HEADER_HEIGHT + crop1.h : HEADER_HEIGHT;
+      ctx.drawImage(
+        imgs[1], crop2.x, crop2.y, crop2.w, crop2.h,
+        x, y, crop2.w, crop2.h
+      );
     }
   } else {
     const crop1 = crops[0];
-    canvas.width = crop1.w * (imgs.length > 3 ? 2 : 1);
-    canvas.height = crop1.h * (imgs.length >= 3 ? 3 : imgs.length);
-
-    canvas.height += HEADER_HEIGHT;
+    canvas.width = layoutWidth;
+    canvas.height = layoutHeight + HEADER_HEIGHT;
 
     isDrawQrCode = isDrawQrCode && imgs.length === 6 && imgs.every(img => img);
     canvas.height += isDrawQrCode ? Math.max(qrSize, fontSize) + 10 : 0;
 
     ctx = canvas.getContext("2d");
-    // 背景を黒埋め
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 元画像描画
     imgs.forEach((img, index) => {
       const crop = crops[index];
       const x = index < 3 ? 0 : crop1.w;
@@ -598,14 +666,14 @@ async function generateMergedImage() {
 
   if (isDrawQrCode) {
     // 文字描画
-    const text1 = t("generatedBy");
-    const text2 = `https://17number.github.io/enr-relics-merger/`;
-    ctx.font = `${fontSize}px sans-serif`;
+    const text1 = footerTexts[0];
+    const text2 = footerTexts[1];
+    ctx.font = `${footerFontSize}px sans-serif`;
     ctx.fillStyle = "white";
     ctx.lineWidth = 0;
     ctx.textAlign = "left";
-    ctx.fillText(text1, fontSize * 0.5, canvas.height - (fontSize * 2.0));
-    ctx.fillText(text2, fontSize * 0.5, canvas.height - (fontSize * 0.5));
+    ctx.fillText(text1, footerFontSize * 0.5, canvas.height - (footerFontSize * 2.0));
+    ctx.fillText(text2, footerFontSize * 0.5, canvas.height - (footerFontSize * 0.5));
 
     // QRコード生成
     const qr = qrcode(0, 'L');
